@@ -1,53 +1,54 @@
-CREATE TABLE 'Restaurant'(
+CREATE TABLE `Restaurant`(
     restaurantName VARCHAR(255),
     restaurantPhone VARCHAR(20)
-) CREATE TABLE 'Branch'(
+); CREATE TABLE `Branch`(
     branchId INT,
     branchName VARCHAR(255),
     branchAddress VARCHAR(255),
     numberOfTables INT
-) CREATE TABLE 'Menu'(menuId INT, branchId INT) CREATE TABLE 'MenuCategory'(
+); CREATE TABLE `Menu`(menuId INT, branchId INT); CREATE TABLE `MenuCategory`(
     menuCategoryId INT,
     menuId INT,
     menuCategoryName VARCHAR(255),
     menuCategoryDescription TEXT
-) CREATE TABLE 'Employee'(
+); CREATE TABLE `Employee`(
     employeeId INT,
     branchId INT,
     dateJoined DATE,
     employeeName VARCHAR(255),
     employeeRole ENUM('CASHIER', 'COOK', 'MANAGER')
-) CREATE TABLE 'MenuItem'(
+); CREATE TABLE `MenuItem`(
     menuItemId INT,
     menuCategoryId INT,
     menuItemName VARCHAR(255),
     menuItemDescription TEXT,
     price DECIMAL(10, 2)
-) CREATE TABLE 'MealItem'(
+); CREATE TABLE `MealItem`(
     mealItemId INT,
     menuItemId INT,
     mealId INT,
     quantity INT
-) CREATE TABLE 'Table'(
+); CREATE TABLE `Table`(
     tableId INT,
     branchId INT,
     maxCapacity INT,
     tableStatus ENUM('FREE', 'OCCUPIED', 'RESERVED')
-) CREATE TABLE 'Order'(
+); CREATE TABLE `Order`(
     orderId INT,
     orderStatus ENUM('COMPLETED', 'PENDING'),
     tableId INT,
     employeeId INT
-) CREATE TABLE 'Meal'(mealId INT, orderId INT,) CREATE TABLE 'TableSeat'(tableSeatId INT, tableId INT) CREATE TABLE 'Bill'(
+); CREATE TABLE `Meal`(mealId INT, orderId INT); CREATE TABLE `TableSeat`(tableSeatId INT, tableId INT); CREATE TABLE `Bill`(
     billId INT,
     orderId INT,
     billAmount DECIMAL(10, 2),
     billTax DECIMAL(10, 2),
     isPaid BIT
-) CREATE TABLE 'Payment'(
+); CREATE TABLE `Payment`(
     paymentId INT,
     billId INT,
     totalAmount DECIMAL(10, 2),
     paymentDateTime DATETIME,
     paymentMethod VARCHAR(255)
 )
+
