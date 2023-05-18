@@ -4,8 +4,22 @@
    This file communicates with View.php and responsible for all the display output
    ******************************************************************/
 
+function displayCart()
+{
+    $items = getCartItems();
+    foreach ($items as $item):
+        print_r($item);
+    endforeach;
+
+}
 function displayMenu($branchId)
 {
+
+    // View Cart Button
+    echo "<form action=view.php method='post'>";
+    echo "<input type='hidden' name='action' value='viewCart'><input type='submit' value='View Cart' />";
+    echo "</form>";
+
     // Go Back Button
     echo "<form action=view.php method='post'>";
     echo "<input type='hidden' name='action' value='goBack'><input type='submit' value='Go Back' />";
@@ -25,6 +39,15 @@ function displayMenu($branchId)
             echo $menuItem['menuItemName'] . ' ---------- ' . $menuItem['price'];
             echo "<br>";
             echo sprintf("<i>%s</i>", $menuItem['menuItemDescription']);
+
+            echo "<form action=view.php method='post'>";
+            echo "<input type='hidden' name='action' value='addToCart'>";
+            // input button to add item into the cart and hidden value to keep track on the itemId added 
+            echo sprintf("<input type='submit' value='+' />");
+            echo sprintf("<input type='hidden' name='menuItemId' value='%s'>", $menuItem['menuItemId']);
+            echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+            echo "</form>";
+
             echo "<br><br>";
         endforeach;
     endforeach;

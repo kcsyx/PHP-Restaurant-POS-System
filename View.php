@@ -11,7 +11,6 @@
     include("Common.php");
 
     $branches = getAllBranches();
-
     if (!empty($_POST)):
         // debug message to check the post actions
         //printArray($_POST);
@@ -23,8 +22,17 @@
                 $branchId = $_POST['branchId'];
                 displayMenu($branchId);
                 break;
+            case "addToCart":
+                $menuItemId = $_POST['menuItemId'];
+                $branchId = $_POST['branchId'];
+                addToCart($menuItemId);
+                displayMenu($branchId);
+                break;
+            case "viewCart":
+                displayCart();
+                break;
             case "goBack":
-                displayBranches($branches);;
+                displayBranches($branches);
                 break;
             default:
                 displayBranches($branches);

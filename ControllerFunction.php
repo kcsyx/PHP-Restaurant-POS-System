@@ -6,6 +6,27 @@
    ******************************************************************/
 
 
+function getCartItems()
+{
+
+    // get all the cart items
+    $cartItems = getAllCart();
+
+    $result = array();
+    foreach ($cartItems as $cartItem):
+        // get the item information based on the itemId
+        $menuItemId = $cartItem["menuItemId"];
+        $menuItem = getMenuItemFromCart($menuItemId);
+
+        // add itemName and itemPrice to the cartItem array
+        $cartItem['menuItemName'] = $menuItem['menuItemName'];
+        $cartItem['price'] = $menuItem['price'];
+        $result[] = $cartItem;
+    endforeach;
+
+    return $result;
+}
+
 /******************************************************************
    All the SELECT SQL connections to the Database
    ******************************************************************/
@@ -45,5 +66,33 @@ function getAllBranches()
     $branches = $DB->select_query("SELECT * FROM Branch");
     return $branches;
 }
+
+function getAllCart()
+{
+    global $DB;
+    $cartItems = $DB->select_query("SELECT * FROM Cart");
+    return $cartItems;
+}
+
+function getMenuItemFromCart($menuItemId)
+{
+    global $DB;
+    $selectSQL = sprintf("SELECT * FROM MenuItem WHERE menuItemId = %s", $menuItemId);
+    $menuItem = $DB->select_query($selectSQL);
+    return $menuItem;
+}
+
+/******************************************************************
+   All the INSERT SQL connections to the Database
+   ******************************************************************/
+
+// add item to Cart
+function addToCart($menuItemId)
+{
+    global $DB;
+    $insertSQL = sprintf("INSERT INTO Cart (`menuItemId`) VALUES ('%s')", $menuItemId);
+    $DB->update_query($insertSQL);
+}
+
 
 ?>
