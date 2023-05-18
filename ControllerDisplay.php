@@ -11,13 +11,6 @@ function displayMenu($branchId)
     echo "<input type='hidden' name='action' value='goBack'><input type='submit' value='Go Back' />";
     echo "</form>";
 
-    // $menuItems = getMenuItems($branchId);
-
-    // foreach ($menuItems as $menuItem):
-    //     echo '<pre>';
-    //     print_r($menuItem);
-    //     echo '</pre>';
-    // endforeach;
     $menuId = (getMenu($branchId))['menuId'];
     $menuCategories = getMenuCategories($menuId);
 
@@ -29,9 +22,10 @@ function displayMenu($branchId)
         $menuItems = getMenuItem($menuCategory['menuCategoryId']);
         foreach ($menuItems as $menuItem):
             echo "<div>";
-            echo $menuItem['menuItemName'];
-            echo $menuItem['menuItemDescription'];
-            echo $menuItem['price'];
+            echo $menuItem['menuItemName'] . ' ---------- ' . $menuItem['price'];
+            echo "<br>";
+            echo sprintf("<i>%s</i>", $menuItem['menuItemDescription']);
+            echo "<br><br>";
         endforeach;
     endforeach;
 }

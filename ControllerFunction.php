@@ -5,19 +5,6 @@
    and formatting the data correctly for display.
    ******************************************************************/
 
-function getMenuItems($branchId)
-{
-    $menu = getMenu($branchId);
-    $result = array();
-    $menuCategories = getMenuCategories($menu['menuId']);
-
-    foreach ($menuCategories as $menuCategory):
-        $menuItem = getMenuItem($menuCategory['menuCategoryId']);
-        array_push($result, $menuItem);
-    endforeach;
-
-    return $result;
-}
 
 /******************************************************************
    All the SELECT SQL connections to the Database
