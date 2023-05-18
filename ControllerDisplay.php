@@ -4,20 +4,90 @@
    This file communicates with View.php and responsible for all the display output
    ******************************************************************/
 
-function displayCart()
+function displayCart($branchId)
 {
-    $items = getCartItems();
-    foreach ($items as $item):
-        print_r($item);
-    endforeach;
+    // Go Back Button
+    echo "<form action=view.php method='post'>";
+    echo "<input type='hidden' name='action' value='goBackFromCart'><input type='submit' value='Go Back' />";
+    echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+    echo "</form>";
 
+    $sum = 0;
+    $items = getCartItems();
+    $gstTax = getPriceConstants(1)['priceModifier'];
+    $itemIds = array();
+    echo "<b>Your Cart</b>";
+    echo "<hr>";
+    if (!empty($items)) {
+        foreach ($items as $item):
+            echo "<div>";
+            echo $item['itemName'] . ' ---------- ' . $item['itemPrice'];
+            $sum += $item['itemPrice'];
+            array_push($itemIds, $item['menuItemId']);
+            echo "<form action=view.php method='post'>";
+            echo "<input type='hidden' name='action' value='removeItemFromCart'>";
+            // input button to add item into the cart and hidden value to keep track on the itemId added 
+            echo sprintf("<input type='submit' value='-' />");
+            echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+            echo sprintf("<input type='hidden' name='cartId' value='%s'>", $item['cartId']);
+            echo "</form>";
+        endforeach;
+        $billItemIds = implode(",", $itemIds);
+    } else {
+        echo "<div><p>Your cart is empty</p></div>";
+    }
+    $gstTaxValue = $sum * $gstTax;
+    $totalSum = $sum + $gstTaxValue;
+    echo "<hr>";
+    echo sprintf("<b>Price: <u>%s</u></b>", number_format((float) $sum, 2, '.', ''));
+    echo "<br>";
+    echo sprintf("<b>GST: <u>%s</u></b>", number_format((float) $gstTaxValue, 2, '.', ''));
+    echo "<br>";
+    echo sprintf("<b>Total Price: <u>%s</u></b>", number_format((float) $totalSum, 2, '.', ''));
+
+    echo "<br><br>";
+
+    if (!empty($items)) {
+        // Remove All Items from Cart Button
+        echo "<form action=view.php method='post'>";
+        echo "<input type='hidden' name='action' value='removeAllItemsFromCart'><input type='submit' value='Remove all items' />";
+        echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+        echo "</form>";
+
+        // Pay Button
+        echo "<form action=view.php method='post'>";
+        echo "<input type='hidden' name='action' value='payCart'><input type='submit' value='Proceed to Payment' />";
+        echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+        echo sprintf("<input type='hidden' name='sum' value='%s'>", $sum);
+        echo sprintf("<input type='hidden' name='billItemIds' value='%s'>", $billItemIds);
+
+        echo "</form>";
+    }
 }
+
+function displayPay($branchId, $sum, $billItemIds)
+{
+    echo sprintf("<b>Amount Payable: <u>%s</u></b>", number_format((float) $sum, 2, '.', ''));
+    echo "<form action=view.php method='post'>";
+    echo "<label for='payment'>Choose a Payment Method:</label>
+    <select id='payment' name='payment' size='2'>
+      <option value='VISA/MASTERCARD'>VISA/MASTERCARD</option>
+      <option value='AMEX'>AMEX</option>
+    </select><br><br>";
+    echo "<input type='hidden' name='action' value='submitPayment'><input type='submit' value='Pay' />";
+    echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+    echo sprintf("<input type='hidden' name='sum' value='%s'>", $sum);
+    echo sprintf("<input type='hidden' name='billItemIds' value='%s'>", $billItemIds);
+    echo "</form>";
+}
+
 function displayMenu($branchId)
 {
 
     // View Cart Button
     echo "<form action=view.php method='post'>";
     echo "<input type='hidden' name='action' value='viewCart'><input type='submit' value='View Cart' />";
+    echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
     echo "</form>";
 
     // Go Back Button

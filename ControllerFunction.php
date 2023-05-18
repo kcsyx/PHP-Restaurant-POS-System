@@ -19,8 +19,8 @@ function getCartItems()
         $menuItem = getMenuItemFromCart($menuItemId);
 
         // add itemName and itemPrice to the cartItem array
-        $cartItem['menuItemName'] = $menuItem['menuItemName'];
-        $cartItem['price'] = $menuItem['price'];
+        $cartItem['itemName'] = $menuItem['menuItemName'];
+        $cartItem['itemPrice'] = $menuItem['price'];
         $result[] = $cartItem;
     endforeach;
 
@@ -78,8 +78,24 @@ function getMenuItemFromCart($menuItemId)
 {
     global $DB;
     $selectSQL = sprintf("SELECT * FROM MenuItem WHERE menuItemId = %s", $menuItemId);
-    $menuItem = $DB->select_query($selectSQL);
+    $menuItem = $DB->select_query($selectSQL, 1);
     return $menuItem;
+}
+
+function getPriceConstants($constantId)
+{
+    global $DB;
+    $selectSQL = sprintf("SELECT * FROM PriceConstants WHERE priceConstantsId = %s", $constantId);
+    $menuItem = $DB->select_query($selectSQL, 1);
+    return $menuItem;
+}
+
+function getLatestBill()
+{
+    global $DB;
+    $selectSQL = sprintf("SELECT * FROM Bill");
+    $bill = $DB->select_query($selectSQL, 1);
+    return $bill;
 }
 
 /******************************************************************
@@ -94,5 +110,39 @@ function addToCart($menuItemId)
     $DB->update_query($insertSQL);
 }
 
+
+function createBill($sum, $billItemIds, $paymentMethod)
+{
+    global $DB;
+    $insertSQL = sprintf("INSERT INTO Bill VALUES (NULL, '%s', $sum)", $billItemIds);
+    $DB->update_query($insertSQL);
+}
+
+function createPayment($paymentMethod, $sum, $billId)
+{
+    global $DB;
+    $insertSQL = sprintf("INSERT INTO `payment`(`paymentId`, `billId`, `totalAmount`, `paymentMethod`) VALUES (NULL,$billId,$sum,'%s')", $paymentMethod);
+    $DB->update_query($insertSQL);
+}
+
+/******************************************************************
+   All the DELETE SQL connections to the Database
+   In reality, no one uses DELETE. This is strictly for demo purposes.
+   ******************************************************************/
+
+// remove an item from Cart
+function removeCartItem($cartId)
+{
+    global $DB;
+    $deleteSQL = sprintf("DELETE FROM Cart WHERE cartId = %s", $cartId);
+    $DB->update_query($deleteSQL);
+}
+
+function removeAllCartItems()
+{
+    global $DB;
+    $deleteSQL = sprintf("DELETE FROM Cart ");
+    $DB->update_query($deleteSQL);
+}
 
 ?>

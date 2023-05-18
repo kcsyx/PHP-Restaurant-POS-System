@@ -29,10 +29,42 @@
                 displayMenu($branchId);
                 break;
             case "viewCart":
-                displayCart();
+                $branchId = $_POST['branchId'];
+                displayCart($branchId);
+                break;
+            case "removeItemFromCart":
+                $cartId = $_POST['cartId'];
+                $branchId = $_POST['branchId'];
+                removeCartItem($cartId);
+                displayCart($branchId);
+                break;
+            case "removeAllItemsFromCart":
+                $branchId = $_POST['branchId'];
+                removeAllCartItems();
+                displayCart($branchId);
                 break;
             case "goBack":
                 displayBranches($branches);
+                break;
+            case "goBackFromCart":
+                $branchId = $_POST['branchId'];
+                displayMenu($branchId);
+                break;
+            case "payCart":
+                $branchId = $_POST['branchId'];
+                $sum = $_POST['sum'];
+                $billItemIds = $_POST['billItemIds'];
+                displayPay($branchId, $sum, $billItemIds);
+                break;
+            case "submitPayment":
+                $branchId = $_POST['branchId'];
+                $sum = $_POST['sum'];
+                $billItemIds = $_POST['billItemIds'];
+                $paymentMethod = $_POST['payment'];
+                createBill($sum, $billItemIds, $paymentMethod);
+                $billId = getLatestBill()['billId'];
+                createPayment($paymentMethod, $sum, $billId);
+                removeAllCartItems();
                 break;
             default:
                 displayBranches($branches);
