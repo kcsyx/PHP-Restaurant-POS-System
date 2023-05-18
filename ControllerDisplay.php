@@ -83,7 +83,7 @@ function displayCart($branchId)
         echo "<form action=view.php method='post'>";
         echo "<input type='hidden' name='action' value='payCart'><input type='submit' value='Proceed to Payment' />";
         echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
-        echo sprintf("<input type='hidden' name='sum' value='%s'>", $sum);
+        echo sprintf("<input type='hidden' name='sum' value='%s'>", $totalSum);
         echo sprintf("<input type='hidden' name='billItemIds' value='%s'>", $billItemIds);
 
         echo "</form>";
