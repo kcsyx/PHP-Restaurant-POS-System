@@ -98,6 +98,14 @@ function getLatestBill()
     return $bill;
 }
 
+function getLatestPayment()
+{
+    global $DB;
+    $selectSQL = sprintf("SELECT * FROM Payment");
+    $payment = $DB->select_query($selectSQL, 1);
+    return $payment;
+}
+
 /******************************************************************
    All the INSERT SQL connections to the Database
    ******************************************************************/

@@ -44,6 +44,7 @@
                 displayCart($branchId);
                 break;
             case "goBack":
+                removeAllCartItems();
                 displayBranches($branches);
                 break;
             case "goBackFromCart":
@@ -65,13 +66,16 @@
                 $billId = getLatestBill()['billId'];
                 createPayment($paymentMethod, $sum, $billId);
                 removeAllCartItems();
+                displayPaymentReceipt($branchId);
                 break;
             default:
+                removeAllCartItems();
                 displayBranches($branches);
 
         endswitch;
     else:
         // if there are no action posted, it will always display menu
+        removeAllCartItems();
         displayBranches($branches);
     endif;
     ?>

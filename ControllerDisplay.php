@@ -3,7 +3,32 @@
    ControllerDisplay.php
    This file communicates with View.php and responsible for all the display output
    ******************************************************************/
+function displayPaymentReceipt($branchId)
+{
+    $payment = getLatestPayment();
+    $cartItems = getLatestBill()['cartIds'];
+    $cartItem = explode(",", $cartItems);
 
+    echo sprintf("Transaction ID: %s", $payment['paymentId']);
+    echo "<br>";
+    echo sprintf("Payment Method: %s", $payment['paymentMethod']);
+    echo "<br>";
+    echo sprintf("Amount Paid: %s", $payment['totalAmount']);
+    echo "<br>";
+    echo sprintf("Transaction Date: %s", $payment['paymentDateTime']);
+    echo "<hr>";
+    foreach ($cartItem as $item):
+        $menuItem = getMenuItemFromCart($item);
+        echo $menuItem['menuItemName'];
+        echo "<br>";
+    endforeach;
+
+    // Go Back Button
+    echo "<form action=view.php method='post'>";
+    echo "<input type='hidden' name='action' value='goBack'><input type='submit' value='Go Back' />";
+    echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+    echo "</form>";
+}
 function displayCart($branchId)
 {
     // Go Back Button
