@@ -1,5 +1,10 @@
 <html>
 
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.51.6/dist/full.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2/dist/tailwind.min.css" rel="stylesheet" type="text/css" />
+</head>
+
 <body>
     <?php
     /******************************************************************
@@ -27,6 +32,7 @@
                 $branchId = $_POST['branchId'];
                 addToCart($menuItemId);
                 displayMenu($branchId);
+                displayPopup();
                 break;
             case "viewCart":
                 $branchId = $_POST['branchId'];
@@ -50,6 +56,10 @@
             case "goBackFromCart":
                 $branchId = $_POST['branchId'];
                 displayMenu($branchId);
+                break;
+            case "goBackFromPay":
+                $branchId = $_POST['branchId'];
+                displayCart($branchId);
                 break;
             case "payCart":
                 $branchId = $_POST['branchId'];

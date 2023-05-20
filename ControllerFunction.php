@@ -5,7 +5,6 @@
    and formatting the data correctly for display.
    ******************************************************************/
 
-
 function getCartItems()
 {
 
@@ -74,12 +73,43 @@ function getAllCart()
     return $cartItems;
 }
 
+function getAllPayments()
+{
+    global $DB;
+    $payments = $DB->select_query("SELECT * FROM Payment");
+    return $payments;
+}
+
+function getAllBills()
+{
+    global $DB;
+    $bills = $DB->select_query("SELECT * FROM Bill");
+    return $bills;
+}
+
+
+function getLatestCart()
+{
+    global $DB;
+    $selectSQL = sprintf("SELECT * FROM Cart ORDER BY cartId DESC LIMIT 1;");
+    $cartItem = $DB->select_query($selectSQL, 1);
+    return $cartItem;
+}
+
 function getMenuItemFromCart($menuItemId)
 {
     global $DB;
     $selectSQL = sprintf("SELECT * FROM MenuItem WHERE menuItemId = %s", $menuItemId);
     $menuItem = $DB->select_query($selectSQL, 1);
     return $menuItem;
+}
+
+function getBillFromPayment($billId)
+{
+    global $DB;
+    $selectSQL = sprintf("SELECT * FROM Bill WHERE billId = %s", $billId);
+    $bill = $DB->select_query($selectSQL, 1);
+    return $bill;
 }
 
 function getPriceConstants($constantId)
@@ -93,7 +123,7 @@ function getPriceConstants($constantId)
 function getLatestBill()
 {
     global $DB;
-    $selectSQL = sprintf("SELECT * FROM Bill");
+    $selectSQL = sprintf("SELECT * FROM Bill ORDER BY billId DESC LIMIT 1;");
     $bill = $DB->select_query($selectSQL, 1);
     return $bill;
 }
@@ -101,10 +131,19 @@ function getLatestBill()
 function getLatestPayment()
 {
     global $DB;
-    $selectSQL = sprintf("SELECT * FROM Payment");
+    $selectSQL = sprintf("SELECT * FROM Payment ORDER BY paymentId DESC LIMIT 1");
     $payment = $DB->select_query($selectSQL, 1);
     return $payment;
 }
+
+function getUser($username, $userpassword)
+{
+    global $DB;
+    $selectSQL = sprintf("SELECT * FROM `User` WHERE userName = '%s' AND userPassword = md5('%s')", $username, $userpassword);
+    $user = $DB->select_query($selectSQL, 1);
+    return $user;
+}
+
 
 /******************************************************************
    All the INSERT SQL connections to the Database
@@ -153,4 +192,28 @@ function removeAllCartItems()
     $DB->update_query($deleteSQL);
 }
 
+function removePayment($paymentId)
+{
+    global $DB;
+    $deleteSQL = sprintf("DELETE FROM Payment WHERE paymentId = %s", $paymentId);
+    $DB->update_query($deleteSQL);
+}
+
+function removeBill($billId)
+{
+    global $DB;
+    $deleteSQL = sprintf("DELETE FROM Bill WHERE billId = %s", $billId);
+    $DB->update_query($deleteSQL);
+}
+
+/******************************************************************
+   All the UPDATE SQL connections to the Database
+   ******************************************************************/
+
+function updateBranch($branchName, $branchAddress, $numberOfTables, $branchId)
+{
+    global $DB;
+    $updateSQL = sprintf("UPDATE branch SET branchName='%s',branchAddress='%s',numberOfTables=%s WHERE branchId = %s", $branchName, $branchAddress, $numberOfTables, $branchId);
+    $DB->update_query($updateSQL);
+}
 ?>
