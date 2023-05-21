@@ -27,7 +27,7 @@ function displayPaymentReceipt($branchId)
     echo "<br>";
     echo sprintf("Transaction Date: %s", $payment['paymentDateTime']);
     echo "</div>";
-    
+
     echo "<div class='w-1/2 float-right'><b>Order Receipt</b><div class='divider'></div>";
     foreach ($cartItem as $item):
         $menuItem = getMenuItemFromCart($item);
@@ -35,10 +35,10 @@ function displayPaymentReceipt($branchId)
         echo "<br>";
     endforeach;
     echo "</div>";
-    
+
     echo "</div>";
 }
-function displayCart($branchId)
+function displayCart($branchId, $promotionValue)
 {
     echo "<div class='container my-16 px-6 mx-auto'>";
 
@@ -87,18 +87,34 @@ function displayCart($branchId)
         echo "<div><p><i>Your cart is empty.</i></p></div>";
     }
     $gstTaxValue = $sum * $gstTax;
-    $totalSum = $sum + $gstTaxValue;
+    $totalSum = $sum + $gstTaxValue + $promotionValue;
     echo "<div class='divider'></div>";
 
-    echo "<div class='w-full flex justify-end'><div class='text-right'>";
-    echo sprintf("<b>Price: <u>$%s</u></b>", number_format((float) $sum, 2, '.', ''));
-    echo "<br>";
-    echo sprintf("<b>GST: <u>$%s</u></b>", number_format((float) $gstTaxValue, 2, '.', ''));
-    echo "<br>";
-    echo sprintf("<b>Total Price: <u>$%s</u></b>", number_format((float) $totalSum, 2, '.', ''));
-    echo "</div></div>";
-
     if (!empty($items)) {
+        echo "<div class='w-full flex justify-end'><div class='text-right'>";
+
+        echo "<form class='mb-8' action=view.php method='post'>";
+        echo "<input type='text' placeholder='Promotion Code' class='input input-bordered w-1/2 max-w-xs' name='promotionCode'/>";
+        echo "<input type='hidden' name='action' value='applyPromotionCode'><input class='btn btn-primary w-1/2 max-w-xs' type='submit' value='Apply' />";
+        echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+        echo "</form>";
+
+        echo sprintf("<b>Price: <u>$%s</u></b>", number_format((float) $sum, 2, '.', ''));
+        echo "<br>";
+        echo sprintf("<b>GST: <u>$%s</u></b>", number_format((float) $gstTaxValue, 2, '.', ''));
+        echo "<br>";
+
+        if ($promotionValue != 0) {
+            echo sprintf("<b>Promotion: <u>$%s</u></b>", number_format((float) $promotionValue, 2, '.', ''));
+            echo "<br>";
+        }
+
+        echo sprintf("<b>Total Price: <u>$%s</u></b>", number_format((float) $totalSum, 2, '.', ''));
+
+
+
+        echo "</div></div>";
+
         // Remove All Items from Cart Button
         echo "<div class='pt-5 w-full flex justify-end gap-6'>";
 
@@ -159,6 +175,16 @@ function displayPopUp()
     echo "<div class='alert alert-success'>";
     echo "<div>";
     echo sprintf("<p><b>%s</b> has been added to your cart.</p>", $menuItem['menuItemName']);
+    echo "</div>";
+    echo "</div>";
+}
+
+function displayDiscountPopUp()
+{
+    echo "<div class='toast toast-end'>";
+    echo "<div class='alert alert-success'>";
+    echo "<div>";
+    echo sprintf("<p>Promotion Code has been applied.</p>");
     echo "</div>";
     echo "</div>";
 }
@@ -229,7 +255,7 @@ function displayBranches($branches)
     foreach ($branches as $branch):
         echo "<div class='card card-side mb-5 bg-neutral text-neutral-content'>";
 
-        echo "<figure><img class='w-80 h-full' src='images/" . $branch['branchImage'] . ".jpg'/></figure>";
+        echo "<figure><img class='w-80 h-full' src='images/" . $branch['branchImage'] . "'/></figure>";
 
         echo "<div class='card-body'>";
         echo sprintf("<div class='card-title'><b>%s</b></div>", $branch['branchName']);

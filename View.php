@@ -36,18 +36,31 @@
                 break;
             case "viewCart":
                 $branchId = $_POST['branchId'];
-                displayCart($branchId);
+                displayCart($branchId, 0);
+                break;
+            case "applyPromotionCode":
+                $promotionCode = $_POST['promotionCode'];
+                $branchId = $_POST['branchId'];
+                $promotion = checkPromoCode($promotionCode);
+                if (!empty($promotion['promotionValue'])) {
+                    $discount = $promotion['promotionValue'];
+                    displayCart($branchId, $discount);
+                    displayDiscountPopup();
+                } else {
+                    $discount = 0;
+                    displayCart($branchId, $discount);
+                }
                 break;
             case "removeItemFromCart":
                 $cartId = $_POST['cartId'];
                 $branchId = $_POST['branchId'];
                 removeCartItem($cartId);
-                displayCart($branchId);
+                displayCart($branchId, 0);
                 break;
             case "removeAllItemsFromCart":
                 $branchId = $_POST['branchId'];
                 removeAllCartItems();
-                displayCart($branchId);
+                displayCart($branchId, 0);
                 break;
             case "goBack":
                 removeAllCartItems();
@@ -59,7 +72,7 @@
                 break;
             case "goBackFromPay":
                 $branchId = $_POST['branchId'];
-                displayCart($branchId);
+                displayCart($branchId, 0);
                 break;
             case "payCart":
                 $branchId = $_POST['branchId'];

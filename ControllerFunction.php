@@ -87,6 +87,12 @@ function getAllBills()
     return $bills;
 }
 
+function getAllPromotions()
+{
+    global $DB;
+    $promotions = $DB->select_query("SELECT * FROM Promotions");
+    return $promotions;
+}
 
 function getLatestCart()
 {
@@ -118,6 +124,14 @@ function getPriceConstants($constantId)
     $selectSQL = sprintf("SELECT * FROM PriceConstants WHERE priceConstantsId = %s", $constantId);
     $menuItem = $DB->select_query($selectSQL, 1);
     return $menuItem;
+}
+
+function checkPromoCode($promotionCode)
+{
+    global $DB;
+    $selectSQL = sprintf("SELECT * FROM promotions WHERE promotionCode = '%s'", $promotionCode);
+    $promotion = $DB->select_query($selectSQL, 1);
+    return $promotion;
 }
 
 function getLatestBill()
@@ -172,6 +186,13 @@ function createPayment($paymentMethod, $sum, $billId)
     $DB->update_query($insertSQL);
 }
 
+function createPromotion($promotionName, $promotionCode, $promotionValue)
+{
+    global $DB;
+    $insertSQL = sprintf("INSERT INTO `promotions`(`promotionId`, `promotionName`, `promotionCode`, `promotionValue`) VALUES (NULL,'%s','%s',%s)", $promotionName, $promotionCode, $promotionValue);
+    $DB->update_query($insertSQL);
+}
+
 /******************************************************************
    All the DELETE SQL connections to the Database
    In reality, no one uses DELETE. This is strictly for demo purposes.
@@ -206,14 +227,28 @@ function removeBill($billId)
     $DB->update_query($deleteSQL);
 }
 
+function removePromotion($promotionId)
+{
+    global $DB;
+    $deleteSQL = sprintf("DELETE FROM Promotions WHERE promotionId = %s", $promotionId);
+    $DB->update_query($deleteSQL);
+}
+
 /******************************************************************
    All the UPDATE SQL connections to the Database
    ******************************************************************/
 
-function updateBranch($branchName, $branchAddress, $numberOfTables, $branchId)
+function updateBranch($branchName, $branchAddress, $numberOfTables, $branchImage, $branchId)
 {
     global $DB;
-    $updateSQL = sprintf("UPDATE branch SET branchName='%s',branchAddress='%s',numberOfTables=%s WHERE branchId = %s", $branchName, $branchAddress, $numberOfTables, $branchId);
+    $updateSQL = sprintf("UPDATE branch SET branchName='%s',branchAddress='%s',numberOfTables=%s, branchImage = '%s' WHERE branchId = %s", $branchName, $branchAddress, $numberOfTables, $branchImage, $branchId);
+    $DB->update_query($updateSQL);
+}
+
+function updatePromotions($promotionName, $promotionCode, $promotionValue, $promotionId)
+{
+    global $DB;
+    $updateSQL = sprintf("UPDATE promotions SET promotionName='%s', promotionCode ='%s', promotionValue=%s WHERE promotionId = %s", $promotionName, $promotionCode, $promotionValue, $promotionId);
     $DB->update_query($updateSQL);
 }
 ?>
