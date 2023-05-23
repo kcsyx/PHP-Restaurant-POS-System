@@ -3,7 +3,7 @@
    ControllerDisplay.php
    This file communicates with View.php and responsible for all the display output
    ******************************************************************/
-function displayPaymentReceipt($branchId, $tableId)
+function displayPaymentReceipt($branchId, $tableId, $isTakeaway)
 {
     $payment = getLatestPayment();
     $cartItems = getLatestBill()['menuIds'];
@@ -18,6 +18,7 @@ function displayPaymentReceipt($branchId, $tableId)
     echo "<input type='hidden' name='action' value='goBackFromCart'><input class='btn btn-primary' type='submit' value='Back to Menu' />";
     echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
     echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+    echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
     echo "</form></div></div>";
 
     echo "<div class='w-1/2 float-left'><b>Payment Receipt</b><div class='divider'></div>";
@@ -29,7 +30,9 @@ function displayPaymentReceipt($branchId, $tableId)
     echo "<br>";
     echo sprintf("Transaction Date: %s", $payment['paymentDateTime']);
     echo "<br>";
-    echo sprintf("Table Number : %s", $table['tableNo']);
+    if ($isTakeaway == false) {
+        echo sprintf("Table Number : %s", $table['tableNo']);
+    }
     echo "</div>";
 
     echo "<div class='w-1/2 float-right'><b>Order Receipt</b><div class='divider'></div>";
@@ -42,7 +45,7 @@ function displayPaymentReceipt($branchId, $tableId)
 
     echo "</div>";
 }
-function displayCart($branchId, $promotionValue, $tableId)
+function displayCart($branchId, $promotionValue, $tableId, $isTakeaway)
 {
     echo "<div class='container my-16 px-6 mx-auto'>";
 
@@ -52,6 +55,7 @@ function displayCart($branchId, $promotionValue, $tableId)
     echo "<input type='hidden' name='action' value='goBackFromCart'><input class='btn btn-primary' type='submit' value='Back to Menu' />";
     echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
     echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+    echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
     echo "</form></div></div>";
 
     $sum = 0;
@@ -75,6 +79,7 @@ function displayCart($branchId, $promotionValue, $tableId)
             echo "<input type='hidden' name='action' value='removeItemFromCart'>";
             echo sprintf("<input class='btn btn-sm btn-error' type='submit' value='Remove' />");
             echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
+            echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
             echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
             echo sprintf("<input type='hidden' name='cartId' value='%s'>", $item['cartId']);
             echo "</form></td>";
@@ -103,6 +108,7 @@ function displayCart($branchId, $promotionValue, $tableId)
         echo "<input type='text' placeholder='Promotion Code' class='input input-bordered w-1/2 max-w-xs' name='promotionCode'/>";
         echo "<input type='hidden' name='action' value='applyPromotionCode'><input class='btn btn-primary w-1/2 max-w-xs' type='submit' value='Apply' />";
         echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+        echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
         echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
         echo "</form>";
 
@@ -114,6 +120,13 @@ function displayCart($branchId, $promotionValue, $tableId)
         if ($promotionValue != 0) {
             echo sprintf("<b>Promotion: <u>%s</u></b>", number_format((float) $promotionValue, 2, '.', ''));
             echo "<br>";
+        }
+
+        if ($isTakeaway == true) {
+            $takeawayFee = getPriceConstants(2)['priceModifier'];
+            echo sprintf("<b>Takeaway Fee: <u>$%s</u></b>", number_format((float) $takeawayFee, 2, '.', ''));
+            echo "<br>";
+            $totalSum += $takeawayFee;
         }
 
         echo sprintf("<b>Total Price: <u>$%s</u></b>", number_format((float) $totalSum, 2, '.', ''));
@@ -128,6 +141,7 @@ function displayCart($branchId, $promotionValue, $tableId)
         echo "<div><form action=view.php method='post'>";
         echo "<input type='hidden' name='action' value='removeAllItemsFromCart'><input class='btn btn-error' type='submit' value='Remove all items' />";
         echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+        echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
         echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
         echo "</form></div>";
 
@@ -137,6 +151,7 @@ function displayCart($branchId, $promotionValue, $tableId)
         echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
         echo sprintf("<input type='hidden' name='sum' value='%s'>", $totalSum);
         echo sprintf("<input type='hidden' name='billItemIds' value='%s'>", $billItemIds);
+        echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
         echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
         echo "</form></div>";
 
@@ -146,7 +161,7 @@ function displayCart($branchId, $promotionValue, $tableId)
     echo "</div>";
 }
 
-function displayPay($branchId, $sum, $billItemIds, $tableId)
+function displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway)
 {
     echo "<div class='container my-16 px-6 mx-auto'>";
 
@@ -155,6 +170,7 @@ function displayPay($branchId, $sum, $billItemIds, $tableId)
     echo "<div class='navbar-start'><form class='mb-0' action=view.php method='post'>";
     echo "<input type='hidden' name='action' value='goBackFromPay'><input class='btn btn-primary' type='submit' value='Back to Cart' />";
     echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+    echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
     echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
     echo "</form></div></div>";
 
@@ -170,6 +186,7 @@ function displayPay($branchId, $sum, $billItemIds, $tableId)
     echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
     echo sprintf("<input type='hidden' name='sum' value='%s'>", $sum);
     echo sprintf("<input type='hidden' name='billItemIds' value='%s'>", $billItemIds);
+    echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
     echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
     echo "</form></div>";
     echo "</div>";
@@ -200,29 +217,45 @@ function displayDiscountPopUp()
     echo "</div>";
 }
 
-function displayMenu($branchId, $tableId)
+function displayMenu($branchId, $tableId, $isTakeaway)
 {
 
     $cartCount = getAllCart();
     echo "<div class='container my-16 px-6 mx-auto'>";
 
     echo "<div class='pb-16 navbar text-neutral-content'>";
-    // Go Back Button
-    echo "<div class='navbar-start'><form class='mb-0' action=view.php method='post'>";
-    echo "<input type='hidden' name='action' value='goBackFromMenu'><input class='btn btn-primary' type='submit' value='Back to Tables' />";
-    echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
-    echo "</form></div>";
+    if ($isTakeaway == false) {
+        // Go Back Button
+        echo "<div class='navbar-start'><form class='mb-0' action=view.php method='post'>";
+        echo "<input type='hidden' name='action' value='goBackFromMenu'><input class='btn btn-primary' type='submit' value='Back to Tables' />";
+        echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+        echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+        echo "</form></div>";
+    } else {
+        // Go Back Button
+        echo "<div class='navbar-start'><form class='mb-0' action=view.php method='post'>";
+        echo "<input type='hidden' name='action' value='goBackFromTables'><input class='btn btn-primary' type='submit' value='Back to Dining Options' />";
+        echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+        echo "</form></div>";
+    }
+
     // View Cart Button
     echo "<div class='navbar-end'><div class='indicator'><form class='mb-0' action=view.php method='post'>";
     echo "<span class='indicator-item badge badge-secondary'>" . sizeof($cartCount) . "</span><input type='hidden' name='action' value='viewCart'><input class='btn btn-success' type='submit' value='View Cart' />";
     echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
     echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
+    echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
     echo "</form></div></div>";
     echo "</div>";
     $branch = getBranchFromTable($branchId);
-    $table = getTable($tableId);
+
     echo sprintf("<p class='text-lg'>Branch: <b>%s</b></p>", $branch['branchName']);
-    echo sprintf("<p class='text-lg'>Table Number: <b>%s</b></p><br><br>", $table['tableNo']);
+    if ($isTakeaway == false) {
+        $table = getTable($tableId);
+        echo sprintf("<p class='text-lg'>Table Number: <b>%s</b></p><br><br>", $table['tableNo']);
+    } else {
+        echo "<br>";
+    }
     $menuId = (getMenu($branchId))['menuId'];
     $menuCategories = getMenuCategories($menuId);
 
@@ -247,6 +280,7 @@ function displayMenu($branchId, $tableId)
             echo sprintf("<input class='btn btn-sm btn-primary' type='submit' value='Add to Cart' />");
             echo sprintf("<input type='hidden' name='menuItemId' value='%s'>", $menuItem['menuItemId']);
             echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+            echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
             echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
             echo "</form></div>";
             echo "</div>";
@@ -258,13 +292,14 @@ function displayMenu($branchId, $tableId)
     echo "</div>";
 }
 
-function displayTables($branchId)
+function displayTables($branchId, $isTakeaway)
 {
     echo "<div class='container my-16 px-6 mx-auto'>";
     echo "<div class='navbar text-neutral-content'>";
     // Go Back Button
     echo "<div class='navbar-start'><form class='mb-0' action=view.php method='post'>";
-    echo "<input type='hidden' name='action' value='goBack'><input class='btn btn-primary' type='submit' value='Back to Branches' />";
+    echo "<input type='hidden' name='action' value='goBackFromTables'><input class='btn btn-primary' type='submit' value='Back to Dining Options' />";
+    echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
     echo "</form></div>";
     echo "</div>";
 
@@ -280,10 +315,11 @@ function displayTables($branchId)
         echo "<input type='hidden' name='action' value='selectTable'>";
         echo sprintf("<p class='card-text text-lg pb-5'>Table <b>%s</b></p>", $table['tableNo']);
         if ($table['isReserved'] == 1) {
-            echo sprintf("<input class='btn btn-disabled card-actions' value='Reserved' />");
+            echo sprintf("<input class='btn btn-disabled card-actions' value='Occupied' />");
         } else {
             echo sprintf("<input class='btn btn-primary card-actions' type='submit' value='Select Table' />");
             echo sprintf("<input type='hidden' name='tableId' value='%s'>", $table['tableId']);
+            echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
             echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
         }
         echo "</form>";
@@ -291,6 +327,45 @@ function displayTables($branchId)
 
         echo "</div>";
     endforeach;
+    echo "</div>";
+    echo "</div>";
+}
+
+function displayDineOptions($branchId)
+{
+    echo "<div class='container my-16 px-6 mx-auto'>";
+    echo "<div class='navbar text-neutral-content'>";
+    // Go Back Button
+    echo "<div class='navbar-start'><form class='mb-0' action=view.php method='post'>";
+    echo "<input type='hidden' name='action' value='goBack'><input class='btn btn-primary' type='submit' value='Back to Branches' />";
+    echo "</form></div>";
+    echo "</div>";
+    $branch = getBranchFromTable($branchId);
+    echo sprintf("<p class='pt-16 text-lg'>Branch: <b>%s</b></p><div class='divider'></div>", $branch['branchName']);
+    echo "<div class='grid lg:grid-cols-3 gap-6'>";
+
+    echo "<div class='card card-side mb-5 bg-neutral text-neutral-content'>";
+    echo "<div class='card-body'>";
+    echo "<form action=view.php method='post'>";
+    echo "<input type='hidden' name='action' value='selectDineOptions'>";
+    echo sprintf("<input class='btn btn-primary card-actions' type='submit' value='Dine-In' />");
+    echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+    echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", false);
+    echo "</form>";
+    echo "</div>";
+    echo "</div>";
+
+    echo "<div class='card card-side mb-5 bg-neutral text-neutral-content'>";
+    echo "<div class='card-body'>";
+    echo "<form action=view.php method='post'>";
+    echo "<input type='hidden' name='action' value='selectDineOptions'>";
+    echo sprintf("<input class='btn btn-primary card-actions' type='submit' value='Takeaway' />");
+    echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+    echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", true);
+    echo "</form>";
+    echo "</div>";
+    echo "</div>";
+
     echo "</div>";
     echo "</div>";
 }
