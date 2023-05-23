@@ -94,6 +94,14 @@ function getAllPromotions()
     return $promotions;
 }
 
+function getAllTables($branchId)
+{
+    global $DB;
+    $selectSQL = sprintf("SELECT * FROM `Table` WHERE branchId = %s", $branchId);
+    $tables = $DB->select_query($selectSQL);
+    return $tables;
+}
+
 function getLatestCart()
 {
     global $DB;
@@ -158,24 +166,31 @@ function getUser($username, $userpassword)
     return $user;
 }
 
+function getTable($tableId)
+{
+    global $DB;
+    $selectSQL = sprintf("SELECT * FROM `Table` WHERE tableId = %s", $tableId);
+    $table = $DB->select_query($selectSQL, 1);
+    return $table;
+}
 
 /******************************************************************
    All the INSERT SQL connections to the Database
    ******************************************************************/
 
 // add item to Cart
-function addToCart($menuItemId)
+function addToCart($menuItemId, $tableId)
 {
     global $DB;
-    $insertSQL = sprintf("INSERT INTO Cart (`menuItemId`) VALUES ('%s')", $menuItemId);
+    $insertSQL = sprintf("INSERT INTO Cart (`menuItemId`, `tableId`) VALUES ('%s', %s)", $menuItemId, $tableId);
     $DB->update_query($insertSQL);
 }
 
 
-function createBill($sum, $billItemIds, $paymentMethod)
+function createBill($sum, $billItemIds, $paymentMethod, $tableId)
 {
     global $DB;
-    $insertSQL = sprintf("INSERT INTO Bill VALUES (NULL, '%s', $sum)", $billItemIds);
+    $insertSQL = sprintf("INSERT INTO Bill VALUES (NULL, '%s', $sum, $tableId)", $billItemIds);
     $DB->update_query($insertSQL);
 }
 
@@ -249,6 +264,13 @@ function updatePromotions($promotionName, $promotionCode, $promotionValue, $prom
 {
     global $DB;
     $updateSQL = sprintf("UPDATE promotions SET promotionName='%s', promotionCode ='%s', promotionValue=%s WHERE promotionId = %s", $promotionName, $promotionCode, $promotionValue, $promotionId);
+    $DB->update_query($updateSQL);
+}
+
+function updateTable($tableId)
+{
+    global $DB;
+    $updateSQL = sprintf("UPDATE `Table` SET isReserved=%s WHERE tableId = %s", 1, $tableId);
     $DB->update_query($updateSQL);
 }
 ?>

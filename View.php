@@ -22,74 +22,98 @@
     
         // based on the action, display the right information
         switch ($_POST['action']):
+            // case "selectBranch":
+            //     // get the item being added 
+            //     $branchId = $_POST['branchId'];
+            //     displayMenu($branchId);
+            //     break;
             case "selectBranch":
                 // get the item being added 
                 $branchId = $_POST['branchId'];
-                displayMenu($branchId);
+                displayTables($branchId);
+                break;
+            case "selectTable":
+                $branchId = $_POST['branchId'];
+                $tableId = $_POST['tableId'];
+                displayMenu($branchId, $tableId);
                 break;
             case "addToCart":
                 $menuItemId = $_POST['menuItemId'];
+                $tableId = $_POST['tableId'];
                 $branchId = $_POST['branchId'];
-                addToCart($menuItemId);
-                displayMenu($branchId);
+                addToCart($menuItemId, $tableId);
+                displayMenu($branchId, $tableId);
                 displayPopup();
                 break;
             case "viewCart":
+                $tableId = $_POST['tableId'];
                 $branchId = $_POST['branchId'];
-                displayCart($branchId, 0);
+                displayCart($branchId, 0, $tableId);
                 break;
             case "applyPromotionCode":
+                $tableId = $_POST['tableId'];
                 $promotionCode = $_POST['promotionCode'];
                 $branchId = $_POST['branchId'];
                 $promotion = checkPromoCode($promotionCode);
                 if (!empty($promotion['promotionValue'])) {
                     $discount = $promotion['promotionValue'];
-                    displayCart($branchId, $discount);
+                    displayCart($branchId, $discount, $tableId);
                     displayDiscountPopup();
                 } else {
                     $discount = 0;
-                    displayCart($branchId, $discount);
+                    displayCart($branchId, $discount, $tableId);
                 }
                 break;
             case "removeItemFromCart":
                 $cartId = $_POST['cartId'];
+                $tableId = $_POST['tableId'];
                 $branchId = $_POST['branchId'];
                 removeCartItem($cartId);
-                displayCart($branchId, 0);
+                displayCart($branchId, 0, $tableId);
                 break;
             case "removeAllItemsFromCart":
+                $tableId = $_POST['tableId'];
                 $branchId = $_POST['branchId'];
                 removeAllCartItems();
-                displayCart($branchId, 0);
+                displayCart($branchId, 0, $tableId);
                 break;
             case "goBack":
                 removeAllCartItems();
                 displayBranches($branches);
                 break;
+            case "goBackFromMenu":
+                $branchId = $_POST['branchId'];
+                displayTables($branchId);
+                break;
             case "goBackFromCart":
                 $branchId = $_POST['branchId'];
-                displayMenu($branchId);
+                $tableId = $_POST['tableId'];
+                displayMenu($branchId, $tableId);
                 break;
             case "goBackFromPay":
                 $branchId = $_POST['branchId'];
-                displayCart($branchId, 0);
+                $tableId = $_POST['tableId'];
+                displayCart($branchId, 0, $tableId);
                 break;
             case "payCart":
                 $branchId = $_POST['branchId'];
+                $tableId = $_POST['tableId'];
                 $sum = $_POST['sum'];
                 $billItemIds = $_POST['billItemIds'];
-                displayPay($branchId, $sum, $billItemIds);
+                displayPay($branchId, $sum, $billItemIds, $tableId);
                 break;
             case "submitPayment":
+                $tableId = $_POST['tableId'];
                 $branchId = $_POST['branchId'];
                 $sum = $_POST['sum'];
                 $billItemIds = $_POST['billItemIds'];
                 $paymentMethod = $_POST['payment'];
-                createBill($sum, $billItemIds, $paymentMethod);
+                createBill($sum, $billItemIds, $paymentMethod, $tableId);
                 $billId = getLatestBill()['billId'];
                 createPayment($paymentMethod, $sum, $billId);
                 removeAllCartItems();
-                displayPaymentReceipt($branchId);
+                updateTable($tableId);
+                displayPaymentReceipt($branchId, $tableId);
                 break;
             default:
                 removeAllCartItems();
