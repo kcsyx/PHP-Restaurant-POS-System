@@ -173,6 +173,13 @@ function getTable($tableId)
     $table = $DB->select_query($selectSQL, 1);
     return $table;
 }
+function getBranchFromTable($branchId)
+{
+    global $DB;
+    $selectSQL = sprintf("SELECT * FROM branch WHERE branchId = %s", $branchId);
+    $branch = $DB->select_query($selectSQL, 1);
+    return $branch;
+}
 
 /******************************************************************
    All the INSERT SQL connections to the Database
@@ -271,6 +278,13 @@ function updateTable($tableId)
 {
     global $DB;
     $updateSQL = sprintf("UPDATE `Table` SET isReserved=%s WHERE tableId = %s", 1, $tableId);
+    $DB->update_query($updateSQL);
+}
+
+function freeTable($tableId)
+{
+    global $DB;
+    $updateSQL = sprintf("UPDATE `Table` SET isReserved=%s WHERE tableId = %s", 0, $tableId);
     $DB->update_query($updateSQL);
 }
 ?>

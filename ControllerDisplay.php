@@ -112,7 +112,7 @@ function displayCart($branchId, $promotionValue, $tableId)
         echo "<br>";
 
         if ($promotionValue != 0) {
-            echo sprintf("<b>Promotion: <u>$%s</u></b>", number_format((float) $promotionValue, 2, '.', ''));
+            echo sprintf("<b>Promotion: <u>%s</u></b>", number_format((float) $promotionValue, 2, '.', ''));
             echo "<br>";
         }
 
@@ -219,7 +219,10 @@ function displayMenu($branchId, $tableId)
     echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
     echo "</form></div></div>";
     echo "</div>";
-
+    $branch = getBranchFromTable($branchId);
+    $table = getTable($tableId);
+    echo sprintf("<p class='text-lg'>Branch: <b>%s</b></p>", $branch['branchName']);
+    echo sprintf("<p class='text-lg'>Table Number: <b>%s</b></p><br><br>", $table['tableNo']);
     $menuId = (getMenu($branchId))['menuId'];
     $menuCategories = getMenuCategories($menuId);
 
@@ -266,8 +269,9 @@ function displayTables($branchId)
     echo "</div>";
 
     $tables = getAllTables($branchId);
-
-    echo "<div class='pt-16 grid lg:grid-cols-3 gap-6'>";
+    $branch = getBranchFromTable($branchId);
+    echo sprintf("<p class='pt-16 text-lg'>Branch: <b>%s</b></p><div class='divider'></div>", $branch['branchName']);
+    echo "<div class='grid lg:grid-cols-3 gap-6'>";
     foreach ($tables as $table):
         echo "<div class='card card-side mb-5 bg-neutral text-neutral-content'>";
 

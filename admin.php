@@ -101,6 +101,16 @@
                 updateBranch($_POST['branchName'], $_POST['branchAddress'], $_POST['numberOfTables'], $img, $_POST['branchId']);
                 adminBranches(0);
                 break;
+            case 'seeTables':
+                $branchId = $_POST['branchId'];
+                adminTables($branchId);
+                break;
+            case 'freeTable':
+                $branchId = $_POST['branchId'];
+                $tableId = $_POST['tableId'];
+                freeTable($tableId);
+                adminTables($branchId);
+                break;
             default:
                 adminPayment();
                 break;
@@ -109,12 +119,62 @@
         adminPayment();
     }
 
+    function adminTables($branchId)
+    {
+        $tables = getAllTables($branchId);
+        $branch = getBranchFromTable($branchId);
+        echo "<div class='pt-8'>";
+        echo sprintf("<span class='text-lg'>Branch: <b>%s</b></span><div class='divider'></div>", $branch['branchName']);
+        echo "<div class='overflow-x-auto'>";
+        echo "<table class='table table-zebra w-full'>";
+        echo "<thead>";
+        echo "<tr>";
+        echo "<th>Table Id</th>";
+        echo "<th>Table Number</th>";
+        echo "<th>Table Status</th>";
+        echo "<th>Actions</th>";
+        echo "</tr>";
+        echo "</thead>";
+        echo "<tbody>";
+        foreach ($tables as $table):
+            echo "<tr>";
+            echo sprintf("<td>%s</td>", $table['tableId']);
+            echo sprintf("<td>%s</td>", $table['tableNo']);
+            if ($table['isReserved'] == 0) {
+                echo sprintf("<td><p style='color:green'>Available</p></td>");
+                echo "<td><form class='mb-0' action=admin.php method='post'>";
+                echo "<input type='hidden' name='action'>";
+                echo sprintf("<input class='btn btn-sm btn-disabled' type='submit' value='Set Available' />");
+                echo "</form></td>";
+                echo "</tr>";
+            } else {
+                echo sprintf("<td><p style='color:red';>Occupied</p></td>");
+                echo "<td><form class='mb-0' action=admin.php method='post'>";
+                echo "<input type='hidden' name='action' value='freeTable'>";
+                echo sprintf("<input class='btn btn-sm btn-success' type='submit' value='Set Available' />");
+                echo sprintf("<input type='hidden' name='tableId' value='%s'>", $table['tableId']);
+                echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+                echo "</form></td>";
+                echo "</tr>";
+            }
+
+        endforeach;
+
+        echo "</tbody>";
+        echo "</table>";
+        echo "</div>";
+
+        if (empty($tables)) {
+            echo "<p><i>No tables found.</i></p>";
+        }
+    }
+
     function adminPromotions($promotionId, $isNew)
     {
 
         $promotions = getAllPromotions();
 
-        echo "<div class='pt-16'>";
+        echo "<div class='pt-8'>";
 
         echo "<div class='overflow-x-auto'>";
         echo "<table class='table table-zebra w-full'>";
@@ -223,7 +283,7 @@
     {
         $payments = getAllPayments();
 
-        echo "<div class='pt-16'>";
+        echo "<div class='pt-8'>";
 
         echo "<div class='overflow-x-auto'>";
         echo "<table class='table table-zebra w-full'>";
@@ -235,6 +295,7 @@
         echo "<th>DateTime</th>";
         echo "<th>Payment Method</th>";
         echo "<th>Items Ordered</th>";
+        echo "<th>Branch</th>";
         echo "<th>Actions</th>";
         echo "</tr>";
         echo "</thead>";
@@ -250,6 +311,9 @@
             $paymentBill = getBillFromPayment($payment['billId']);
             $billMenuItems = $paymentBill['menuIds'];
             $billMenuItemsArray = explode(",", $billMenuItems);
+            $billTableId = $paymentBill['tableId'];
+            $branchId = getTable($billTableId)['branchId'];
+            $branchName = (getBranchFromTable($branchId))['branchName'];
             echo "<td>";
             foreach ($billMenuItemsArray as $billMenuItem):
                 $menuItem = getMenuItemFromCart($billMenuItem);
@@ -257,7 +321,7 @@
                 echo "<br>";
             endforeach;
             echo "</td>";
-
+            echo sprintf("<td>%s</td>", $branchName);
             echo "<td><form class='mb-0' action=admin.php method='post'>";
             echo "<input type='hidden' name='action' value='deletePayment'>";
             echo sprintf("<input class='btn btn-sm btn-error' type='submit' value='Delete' />");
@@ -281,7 +345,7 @@
 
         $branches = getAllBranches();
 
-        echo "<div class='pt-16'>";
+        echo "<div class='pt-8'>";
 
         echo "<div class='overflow-x-auto'>";
         echo "<table class='table table-zebra w-full'>";
@@ -303,7 +367,12 @@
                 echo sprintf("<td>%s</td>", $branch['branchId']);
                 echo sprintf("<td>%s</td>", $branch['branchName']);
                 echo sprintf("<td>%s</td>", $branch['branchAddress']);
-                echo sprintf("<td>%s</td>", $branch['numberOfTables']);
+                echo sprintf("<td><p class='text-center'>%s</p>", $branch['numberOfTables']);
+                echo "<form class='pt-2 mb-0' action=admin.php method='post'>";
+                echo "<input type='hidden' name='action' value='seeTables'>";
+                echo sprintf("<input class='btn btn-sm btn-success' type='submit' value='View Tables' />");
+                echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branch['branchId']);
+                echo "</form></td>";
                 echo sprintf("<td><img class='w-32 h-full' src='images/" . $branch['branchImage'] . "'/></td>");
                 echo "<td><form class='mb-0' action=admin.php method='post'>";
                 echo "<input type='hidden' name='action' value='updateBranch'>";
