@@ -248,7 +248,7 @@
             echo sprintf("<td>%s</td>", $payment['paymentMethod']);
 
             $paymentBill = getBillFromPayment($payment['billId']);
-            $billMenuItems = $paymentBill['menuIds '];
+            $billMenuItems = $paymentBill['menuIds'];
             $billMenuItemsArray = explode(",", $billMenuItems);
             echo "<td>";
             foreach ($billMenuItemsArray as $billMenuItem):
