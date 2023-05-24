@@ -295,7 +295,7 @@
         echo "<th>DateTime</th>";
         echo "<th>Payment Method</th>";
         echo "<th>Items Ordered</th>";
-        echo "<th>Branch</th>";
+        echo "<th>Dining</th>";
         echo "<th>Actions</th>";
         echo "</tr>";
         echo "</thead>";
@@ -321,7 +321,11 @@
                 echo "<br>";
             endforeach;
             echo "</td>";
-            echo sprintf("<td>%s</td>", $branchName);
+            if (!empty($branchName)) {
+                echo sprintf("<td>Dine-In, %s</td>", $branchName);
+            } else {
+                echo sprintf("<td>Takeaway, %s</td>", (getBranchFromTable($paymentBill['branchId']))['branchName']);
+            }
             echo "<td><form class='mb-0' action=admin.php method='post'>";
             echo "<input type='hidden' name='action' value='deletePayment'>";
             echo sprintf("<input class='btn btn-sm btn-error' type='submit' value='Delete' />");

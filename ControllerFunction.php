@@ -194,10 +194,10 @@ function addToCart($menuItemId, $tableId)
 }
 
 
-function createBill($sum, $billItemIds, $paymentMethod, $tableId)
+function createBill($sum, $billItemIds, $paymentMethod, $tableId, $branchId)
 {
     global $DB;
-    $insertSQL = sprintf("INSERT INTO Bill VALUES (NULL, '%s', $sum, $tableId)", $billItemIds);
+    $insertSQL = sprintf("INSERT INTO Bill VALUES (NULL, '%s', $sum, $tableId, $branchId)", $billItemIds);
     $DB->update_query($insertSQL);
 }
 

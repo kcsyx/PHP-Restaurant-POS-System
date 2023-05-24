@@ -135,7 +135,7 @@
                 $sum = $_POST['sum'];
                 $billItemIds = $_POST['billItemIds'];
                 $paymentMethod = $_POST['payment'];
-                createBill($sum, $billItemIds, $paymentMethod, $tableId);
+                createBill($sum, $billItemIds, $paymentMethod, $tableId, $branchId);
                 $billId = getLatestBill()['billId'];
                 createPayment($paymentMethod, $sum, $billId);
                 removeAllCartItems();
