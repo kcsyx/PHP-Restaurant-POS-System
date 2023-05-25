@@ -181,15 +181,31 @@ function getBranchFromTable($branchId)
     return $branch;
 }
 
+function getItemTypeAddOns($itemTypeId)
+{
+    global $DB;
+    $selectSQL = sprintf("SELECT * FROM `itemTypeAddOns` WHERE itemTypeId = %s", $itemTypeId);
+    $itemTypeAddOns = $DB->select_query($selectSQL);
+    return $itemTypeAddOns;
+}
+
+function getItemTypeAddOnsFromPK($itemTypeAddOnsId)
+{
+    global $DB;
+    $selectSQL = sprintf("SELECT * FROM `itemTypeAddOns` WHERE itemTypeAddOnsId = %s", $itemTypeAddOnsId);
+    $itemTypeAddOns = $DB->select_query($selectSQL, 1);
+    return $itemTypeAddOns;
+}
+
 /******************************************************************
    All the INSERT SQL connections to the Database
    ******************************************************************/
 
 // add item to Cart
-function addToCart($menuItemId, $tableId)
+function addToCart($menuItemId, $tableId, $itemAddOns)
 {
     global $DB;
-    $insertSQL = sprintf("INSERT INTO Cart (`menuItemId`, `tableId`) VALUES ('%s', %s)", $menuItemId, $tableId);
+    $insertSQL = sprintf("INSERT INTO Cart (`menuItemId`, `tableId`, `itemAddOns`) VALUES ('%s', %s, '%s')", $menuItemId, $tableId, $itemAddOns);
     $DB->update_query($insertSQL);
 }
 

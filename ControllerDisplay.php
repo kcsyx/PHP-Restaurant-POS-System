@@ -45,6 +45,52 @@ function displayPaymentReceipt($branchId, $tableId, $isTakeaway)
 
     echo "</div>";
 }
+
+function displayItemAddOns($menuItemId, $tableId, $branchId, $isTakeaway)
+{
+    echo "<div class='container my-16 px-6 mx-auto'>";
+
+    echo "<div class='pb-16 navbar text-neutral-content'>";
+    // Go Back Button
+    echo "<div class='navbar-start'><form class='mb-0' action=view.php method='post'>";
+    echo "<input type='hidden' name='action' value='goBackFromCart'><input class='btn btn-primary' type='submit' value='Back to Menu' />";
+    echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
+    echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+    echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+    echo "</form></div></div>";
+
+    $menuItem = getMenuItemFromCart($menuItemId);
+
+    echo sprintf("<b>%s Add-Ons</b><div class='divider'> </div>", $menuItem['menuItemName']);
+
+    $itemTypeAddOns = getItemTypeAddOns($menuItem['itemTypeId']);
+
+    echo "<form action='view.php' method='post'>";
+    if ($menuItem['itemTypeId'] == 1) {
+        foreach ($itemTypeAddOns as $itemTypeAddOn):
+            echo "<div class='form-control w-1/4'><label class='label cursor-pointer'>";
+            echo sprintf("<label class='label-text' for='%s'>%s<br>+<b>$%s</b></label>", $itemTypeAddOn['itemTypeAddOnsId'], $itemTypeAddOn['itemTypeAddOnsName'], $itemTypeAddOn['itemTypeAddOnsPriceModifier']);
+            echo sprintf("<input class='checkbox checkbox-primary' type='checkbox' name='itemTypes[]' value='%s' id='%s'>", $itemTypeAddOn['itemTypeAddOnsId'], $itemTypeAddOn['itemTypeAddOnsId']);
+            echo "</label></div><br><br>";
+        endforeach;
+    } else if ($menuItem['itemTypeId'] == 2) {
+        foreach ($itemTypeAddOns as $itemTypeAddOn):
+            echo "<div class='form-control w-1/4'><label class='label cursor-pointer'>";
+            echo sprintf("<label class='label-text' for='%s' required>%s<br>+<b>$%s</b></label>", $itemTypeAddOn['itemTypeAddOnsId'], $itemTypeAddOn['itemTypeAddOnsName'], $itemTypeAddOn['itemTypeAddOnsPriceModifier']);
+            echo sprintf("<input class='radio radio-primary' type='radio' name='itemTypes[]' value='%s' id='%s' checked>", $itemTypeAddOn['itemTypeAddOnsId'], $itemTypeAddOn['itemTypeAddOnsId']);
+            echo "</label></div><br><br>";
+        endforeach;
+    }
+    echo "<input type='hidden' name='action' value='selectAddOns'><input class='btn btn-primary' type='submit' value='Add To Cart' />";
+    echo sprintf("<input type='hidden' name='menuItemId' value='%s'>", $menuItemId);
+    echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
+    echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+    echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+    echo "</form>";
+
+    echo "</div>";
+}
+
 function displayCart($branchId, $promotionValue, $tableId, $isTakeaway)
 {
     echo "<div class='container my-16 px-6 mx-auto'>";
@@ -63,6 +109,7 @@ function displayCart($branchId, $promotionValue, $tableId, $isTakeaway)
     $gstTax = getPriceConstants(1)['priceModifier'];
     $itemIds = array();
     $counter = 1;
+    $totalAddOnPrice = 0;
 
     echo "<b>Your Cart</b><br><br>";
 
@@ -73,7 +120,17 @@ function displayCart($branchId, $promotionValue, $tableId, $isTakeaway)
         foreach ($items as $item):
             echo "<tr>";
             echo sprintf("<td>%s</td>", $counter);
-            echo sprintf("<td>%s</td>", $item['itemName']);
+            echo sprintf("<td>%s", $item['itemName']);
+
+            if (!empty($item['itemAddOns'])) {
+                $itemTypeIdsArray = explode(",", $item['itemAddOns']);
+
+                foreach ($itemTypeIdsArray as $itemTypeId):
+                    $itemTypeAddOnsData = getItemTypeAddOnsFromPK($itemTypeId);
+                    echo sprintf("<br>%s", $itemTypeAddOnsData['itemTypeAddOnsName']);
+                endforeach;
+                echo "</td>";
+            }
 
             echo "<td><form class='mb-0' action=view.php method='post'>";
             echo "<input type='hidden' name='action' value='removeItemFromCart'>";
@@ -84,7 +141,18 @@ function displayCart($branchId, $promotionValue, $tableId, $isTakeaway)
             echo sprintf("<input type='hidden' name='cartId' value='%s'>", $item['cartId']);
             echo "</form></td>";
 
-            echo sprintf("<td>$%s</td>", $item['itemPrice']);
+            echo sprintf("<td>$%s", $item['itemPrice']);
+            if (!empty($item['itemAddOns'])) {
+                $itemTypeIdsArray = explode(",", $item['itemAddOns']);
+                foreach ($itemTypeIdsArray as $itemTypeId):
+                    $itemTypeAddOnsData = getItemTypeAddOnsFromPK($itemTypeId);
+                    echo sprintf("<br>$%s", $itemTypeAddOnsData['itemTypeAddOnsPriceModifier']);
+                    $totalAddOnPrice += $itemTypeAddOnsData['itemTypeAddOnsPriceModifier'];
+                endforeach;
+                echo "</td>";
+            }
+
+            echo "</td>";
 
             $sum += $item['itemPrice'];
             array_push($itemIds, $item['menuItemId']);
@@ -97,6 +165,7 @@ function displayCart($branchId, $promotionValue, $tableId, $isTakeaway)
     } else {
         echo "<div><p><i>Your cart is empty.</i></p></div>";
     }
+    $sum += $totalAddOnPrice;
     $gstTaxValue = $sum * $gstTax;
     $totalSum = $sum + $gstTaxValue + $promotionValue;
     echo "<div class='divider'></div>";
@@ -274,17 +343,29 @@ function displayMenu($branchId, $tableId, $isTakeaway)
             echo sprintf("<div class='stat-value'>$%s</div>", $menuItem['price']);
             echo sprintf("<div class='stat-desc'>%s</div>", $menuItem['menuItemDescription']);
 
-            echo "<div class='stat-actions'><form action=view.php method='post'>";
-            echo "<input type='hidden' name='action' value='addToCart'>";
-            // input button to add item into the cart and hidden value to keep track on the itemId added 
-            echo sprintf("<input class='btn btn-sm btn-primary' type='submit' value='Add to Cart' />");
-            echo sprintf("<input type='hidden' name='menuItemId' value='%s'>", $menuItem['menuItemId']);
-            echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
-            echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
-            echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
-            echo "</form></div>";
-            echo "</div>";
-
+            if (!empty($menuItem['itemTypeId'])) {
+                echo "<div class='stat-actions'><form action=view.php method='post'>";
+                echo "<input type='hidden' name='action' value='viewItemAddOns'>";
+                // input button to add item into the cart and hidden value to keep track on the itemId added 
+                echo sprintf("<input class='btn btn-sm btn-primary' type='submit' value='Add to Cart' />");
+                echo sprintf("<input type='hidden' name='menuItemId' value='%s'>", $menuItem['menuItemId']);
+                echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+                echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+                echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
+                echo "</form></div>";
+                echo "</div>";
+            } else {
+                echo "<div class='stat-actions'><form action=view.php method='post'>";
+                echo "<input type='hidden' name='action' value='addToCart'>";
+                // input button to add item into the cart and hidden value to keep track on the itemId added 
+                echo sprintf("<input class='btn btn-sm btn-primary' type='submit' value='Add to Cart' />");
+                echo sprintf("<input type='hidden' name='menuItemId' value='%s'>", $menuItem['menuItemId']);
+                echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+                echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+                echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
+                echo "</form></div>";
+                echo "</div>";
+            }
             echo "</div>";
         endforeach;
         echo "</div>";

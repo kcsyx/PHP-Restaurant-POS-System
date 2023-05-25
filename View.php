@@ -48,12 +48,33 @@
                 $tableId = $_POST['tableId'];
                 displayMenu($branchId, $tableId, $isTakeaway);
                 break;
+            case "viewItemAddOns":
+                $menuItemId = $_POST['menuItemId'];
+                $tableId = $_POST['tableId'];
+                $branchId = $_POST['branchId'];
+                $isTakeaway = $_POST['isTakeaway'];
+                displayItemAddOns($menuItemId, $tableId, $branchId, $isTakeaway);
+                break;
+            case "selectAddOns":
+                if (!empty($_POST['itemTypes'])) {
+                    $itemAddOns = implode(",", $_POST['itemTypes']);
+                } else {
+                    $itemAddOns = null;
+                }
+                $menuItemId = $_POST['menuItemId'];
+                $tableId = $_POST['tableId'];
+                $branchId = $_POST['branchId'];
+                $isTakeaway = $_POST['isTakeaway'];
+                addToCart($menuItemId, $tableId, $itemAddOns);
+                displayMenu($branchId, $tableId, $isTakeaway);
+                displayPopUp();
+                break;
             case "addToCart":
                 $menuItemId = $_POST['menuItemId'];
                 $tableId = $_POST['tableId'];
                 $branchId = $_POST['branchId'];
                 $isTakeaway = $_POST['isTakeaway'];
-                addToCart($menuItemId, $tableId);
+                addToCart($menuItemId, $tableId, null);
                 displayMenu($branchId, $tableId, $isTakeaway);
                 displayPopup();
                 break;
