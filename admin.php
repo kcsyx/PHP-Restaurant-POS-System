@@ -14,6 +14,14 @@
        ******************************************************************/
 
     include("Common.php");
+    $userRole = "";
+    if ($_GET) {
+        $userRole = $_GET['role'];
+    } else if ($_POST) {
+        $userRole = $_POST['role'];
+    } else {
+        header("location: index.php");
+    }
 
     echo "<div class='container my-16 px-6 mx-auto'>";
     echo "<div class='navbar text-neutral-content'>";
@@ -23,18 +31,21 @@
     echo "</form></div>";
 
     echo "<div class='navbar-end gap-2'>";
-    // View Promotion Button
-    echo "<div><form class='mb-8' action=admin.php method='post'>";
-    echo "<input type='hidden' name='action' value='viewPromotions'><input class='btn btn-primary w-full max-w-xs' type='submit' value='Promotions' />";
-    echo sprintf("<input type='hidden' name='promotionId' value='%s'>", 0);
-    echo "</form></div>";
     // View Payments Button
     echo "<div><form class='mb-8' action=admin.php method='post'>";
     echo "<input type='hidden' name='action' value=''><input class='btn btn-primary w-full max-w-xs' type='submit' value='Payments' />";
+    echo sprintf("<input type='hidden' name='role' value='%s'>", $userRole);
+    echo "</form></div>";
+    // View Promotion Button
+    echo "<div><form class='mb-8' action=admin.php method='post'>";
+    echo "<input type='hidden' name='action' value='viewPromotions'><input class='btn btn-primary w-full max-w-xs' type='submit' value='Promotions' />";
+    echo sprintf("<input type='hidden' name='role' value='%s'>", $userRole);
+    echo sprintf("<input type='hidden' name='promotionId' value='%s'>", 0);
     echo "</form></div>";
     // View Branches Button
     echo "<div><form class='mb-8' action=admin.php method='post'>";
     echo "<input type='hidden' name='action' value='viewBranches'><input class='btn btn-primary w-full max-w-xs' type='submit' value='Branches' />";
+    echo sprintf("<input type='hidden' name='role' value='%s'>", $userRole);
     echo sprintf("<input type='hidden' name='branchId' value='%s'>", 0);
     echo "</form></div>";
     echo "</div>";
@@ -44,54 +55,67 @@
     if (!empty($_POST)) {
         switch ($_POST['action']) {
             case 'deletePayment':
+                global $userRole;
                 $paymentId = $_POST['paymentId'];
                 $billId = $_POST['billId'];
                 removePayment($paymentId);
                 removeBill($billId);
-                adminPayment();
+                adminPayment($userRole);
                 break;
             case 'viewPromotions':
+                global $userRole;
                 $promotionId = $_POST['promotionId'];
-                adminPromotions($promotionId, false);
+                adminPromotions($promotionId, false, $userRole);
                 break;
             case 'updatePromotion':
+                global $userRole;
                 $promotionId = $_POST['promotionId'];
-                adminPromotions($promotionId, false);
+                adminPromotions($promotionId, false, $userRole);
                 break;
             case 'cancelUpdatePromotion':
-                adminPromotions(0, false);
+                global $userRole;
+                adminPromotions(0, false, $userRole);
                 break;
             case 'confirmUpdatePromotion':
+                global $userRole;
                 updatePromotions($_POST['promotionName'], $_POST['promotionCode'], $_POST['promotionValue'], $_POST['promotionId']);
-                adminPromotions(0, false);
+                adminPromotions(0, false, $userRole);
                 break;
             case 'deletePromotion':
                 $promotionId = $_POST['promotionId'];
+                global $userRole;
                 removePromotion($promotionId);
-                adminPromotions(0, false);
+                adminPromotions(0, false, $userRole);
                 break;
             case 'newPromotion':
-                adminPromotions(0, true);
+                global $userRole;
+                adminPromotions(0, true, $userRole);
                 break;
             case 'confirmNewPromotion':
                 createPromotion($_POST['promotionName'], $_POST['promotionCode'], $_POST['promotionValue']);
-                adminPromotions(0, false);
+                global $userRole;
+                adminPromotions(0, false, $userRole);
                 break;
             case 'cancelNewPromotion':
-                adminPromotions(0, false);
+                global $userRole;
+                adminPromotions(0, false, $userRole);
                 break;
             case 'viewBranches':
                 $branchId = $_POST['branchId'];
-                adminBranches($branchId);
+                global $userRole;
+                adminBranches($branchId, $userRole);
                 break;
             case 'updateBranch':
                 $branchId = $_POST['branchId'];
-                adminBranches($branchId);
+                global $userRole;
+                adminBranches($branchId, $userRole);
                 break;
             case 'cancelUpdateBranch':
-                adminBranches(0);
+                global $userRole;
+                adminBranches(0, $userRole);
                 break;
             case 'confirmUpdateBranch':
+                global $userRole;
                 if (empty($_FILES['branchImage']['name'])) {
                     $img = $_POST['originalBranchImage'];
                 } else {
@@ -99,27 +123,30 @@
                     move_uploaded_file($_FILES['branchImage']['tmp_name'], "images/$img");
                 }
                 updateBranch($_POST['branchName'], $_POST['branchAddress'], $_POST['numberOfTables'], $img, $_POST['branchId']);
-                adminBranches(0);
+                adminBranches(0, $userRole);
                 break;
             case 'seeTables':
+                global $userRole;
                 $branchId = $_POST['branchId'];
-                adminTables($branchId);
+                adminTables($branchId, $userRole);
                 break;
             case 'freeTable':
+                global $userRole;
                 $branchId = $_POST['branchId'];
                 $tableId = $_POST['tableId'];
                 freeTable($tableId);
-                adminTables($branchId);
+                adminTables($branchId, $userRole);
                 break;
             default:
-                adminPayment();
+                global $userRole;
+                adminPayment($userRole);
                 break;
         }
     } else {
-        adminPayment();
+        adminPayment($userRole);
     }
 
-    function adminTables($branchId)
+    function adminTables($branchId, $role)
     {
         $tables = getAllTables($branchId);
         $branch = getBranchFromTable($branchId);
@@ -144,6 +171,7 @@
                 echo sprintf("<td><p style='color:green'>Available</p></td>");
                 echo "<td><form class='mb-0' action=admin.php method='post'>";
                 echo "<input type='hidden' name='action'>";
+                echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
                 echo sprintf("<input class='btn btn-sm btn-disabled' type='submit' value='Set Available' />");
                 echo "</form></td>";
                 echo "</tr>";
@@ -153,6 +181,7 @@
                 echo "<input type='hidden' name='action' value='freeTable'>";
                 echo sprintf("<input class='btn btn-sm btn-success' type='submit' value='Set Available' />");
                 echo sprintf("<input type='hidden' name='tableId' value='%s'>", $table['tableId']);
+                echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
                 echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
                 echo "</form></td>";
                 echo "</tr>";
@@ -169,7 +198,7 @@
         }
     }
 
-    function adminPromotions($promotionId, $isNew)
+    function adminPromotions($promotionId, $isNew, $role)
     {
 
         $promotions = getAllPromotions();
@@ -187,10 +216,13 @@
         echo "<th>Actions</th>";
         echo "<th></th>";
         echo "<th>";
-        echo "<form class='mb-0' action=admin.php method='post'>";
-        echo "<input type='hidden' name='action' value='newPromotion'>";
-        echo sprintf("<input class='btn btn-sm btn-success' type='submit' value='New Promotion' />");
-        echo "</form>";
+        if ($role == 'admin') {
+            echo "<form class='mb-0' action=admin.php method='post'>";
+            echo "<input type='hidden' name='action' value='newPromotion'>";
+            echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
+            echo sprintf("<input class='btn btn-sm btn-success' type='submit' value='New Promotion' />");
+            echo "</form>";
+        }
         echo "</th>";
         echo "</tr>";
         echo "</thead>";
@@ -202,20 +234,38 @@
                 echo sprintf("<td>%s</td>", $promotion['promotionName']);
                 echo sprintf("<td>%s</td>", $promotion['promotionCode']);
                 echo sprintf("<td>%s</td>", $promotion['promotionValue']);
-                echo "<td><form class='mb-0' action=admin.php method='post'>";
-                echo "<input type='hidden' name='action' value='updatePromotion'>";
-                echo sprintf("<input class='btn btn-sm btn-primary' type='submit' value='Update' />");
-                echo sprintf("<input type='hidden' name='promotionId' value='%s'>", $promotion['promotionId']);
-                echo "</form></td>";
-                echo "<td><form class='mb-0' action=admin.php method='post'>";
-                echo "<input type='hidden' name='action' value='deletePromotion'>";
-                echo sprintf("<input class='btn btn-sm btn-error' type='submit' value='Delete' />");
-                echo sprintf("<input type='hidden' name='promotionId' value='%s'>", $promotion['promotionId']);
-                echo "</form></td>";
 
-                echo "<td>";
-                echo sprintf("<input class='btn btn-sm btn-disabled' value='' />");
-                echo "</td>";
+                if ($role == 'admin') {
+                    echo "<td><form class='mb-0' action=admin.php method='post'>";
+                    echo "<input type='hidden' name='action' value='updatePromotion'>";
+                    echo sprintf("<input class='btn btn-sm btn-primary' type='submit' value='Update' />");
+                    echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
+                    echo sprintf("<input type='hidden' name='promotionId' value='%s'>", $promotion['promotionId']);
+                    echo "</form></td>";
+                    echo "<td><form class='mb-0' action=admin.php method='post'>";
+                    echo "<input type='hidden' name='action' value='deletePromotion'>";
+                    echo sprintf("<input class='btn btn-sm btn-error' type='submit' value='Delete' />");
+                    echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
+                    echo sprintf("<input type='hidden' name='promotionId' value='%s'>", $promotion['promotionId']);
+                    echo "</form></td>";
+                    echo "<td>";
+                    echo sprintf("<input class='btn btn-sm btn-disabled' value='' />");
+                    echo "</td>";
+                } else {
+                    echo "<td><form class='mb-0' action=admin.php method='post'>";
+                    echo "<input type='hidden' name='action'>";
+                    echo sprintf("<input class='btn btn-sm btn-disabled' value='Update' />");
+                    echo "</form></td>";
+                    echo "<td><form class='mb-0' action=admin.php method='post'>";
+                    echo "<input type='hidden' name='action'>";
+                    echo sprintf("<input class='btn btn-sm btn-disabled' value='Delete' />");
+                    echo "</form></td>";
+                    echo "<td>";
+                    echo "</td>";
+                }
+
+
+
 
                 echo "</tr>";
             } else {
@@ -229,12 +279,14 @@
                 echo "<td><form class='mb-0' action=admin.php method='post'>";
                 echo "<input type='hidden' name='action' value='confirmUpdatePromotion'>";
                 echo sprintf("<input class='btn btn-sm btn-success' type='submit' value='Confirm' />");
+                echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
                 echo sprintf("<input type='hidden' name='promotionId' value='%s'>", $promotionId);
                 echo "</form></td>";
                 echo "</form>";
 
                 echo "<td><form class='mb-0' action=admin.php method='post'>";
                 echo "<input type='hidden' name='action' value='cancelUpdatePromotion'>";
+                echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
                 echo sprintf("<input class='btn btn-sm btn-error' type='submit' value='Cancel' />");
                 echo "</form></td>";
 
@@ -256,12 +308,14 @@
 
             echo "<td><form class='mb-0' action=admin.php method='post'>";
             echo "<input type='hidden' name='action' value='confirmNewPromotion'>";
+            echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
             echo sprintf("<input class='btn btn-sm btn-success' type='submit' value='Confirm' />");
             echo "</form></td>";
             echo "</form>";
 
             echo "<td><form class='mb-0' action=admin.php method='post'>";
             echo "<input type='hidden' name='action' value='cancelNewPromotion'>";
+            echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
             echo sprintf("<input class='btn btn-sm btn-error' type='submit' value='Cancel' />");
             echo "</form></td>";
 
@@ -279,7 +333,7 @@
         }
     }
 
-    function adminPayment()
+    function adminPayment($role)
     {
         $payments = getAllPayments();
 
@@ -326,12 +380,21 @@
             } else {
                 echo sprintf("<td>Takeaway, %s</td>", (getBranchFromTable($paymentBill['branchId']))['branchName']);
             }
-            echo "<td><form class='mb-0' action=admin.php method='post'>";
-            echo "<input type='hidden' name='action' value='deletePayment'>";
-            echo sprintf("<input class='btn btn-sm btn-error' type='submit' value='Delete' />");
-            echo sprintf("<input type='hidden' name='paymentId' value='%s'>", $payment['paymentId']);
-            echo sprintf("<input type='hidden' name='billId' value='%s'>", $payment['billId']);
-            echo "</form></td>";
+
+            if ($role == 'admin') {
+                echo "<td><form class='mb-0' action=admin.php method='post'>";
+                echo "<input type='hidden' name='action' value='deletePayment'>";
+                echo sprintf("<input class='btn btn-sm btn-error' type='submit' value='Delete' />");
+                echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
+                echo sprintf("<input type='hidden' name='paymentId' value='%s'>", $payment['paymentId']);
+                echo sprintf("<input type='hidden' name='billId' value='%s'>", $payment['billId']);
+                echo "</form></td>";
+            } else {
+                echo "<td><form class='mb-0' action=admin.php method='post'>";
+                echo "<input type='hidden' name='action'>";
+                echo sprintf("<input class='btn btn-sm btn-disabled' value='Delete' />");
+                echo "</form></td>";
+            }
 
             echo "</tr>";
         endforeach;
@@ -344,7 +407,7 @@
         }
     }
 
-    function adminBranches($branchId)
+    function adminBranches($branchId, $role)
     {
 
         $branches = getAllBranches();
@@ -375,15 +438,27 @@
                 echo "<form class='pt-2 mb-0' action=admin.php method='post'>";
                 echo "<input type='hidden' name='action' value='seeTables'>";
                 echo sprintf("<input class='btn btn-sm btn-success' type='submit' value='View Tables' />");
+                echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
                 echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branch['branchId']);
                 echo "</form></td>";
                 echo sprintf("<td><img class='w-32 h-full' src='images/" . $branch['branchImage'] . "'/></td>");
-                echo "<td><form class='mb-0' action=admin.php method='post'>";
-                echo "<input type='hidden' name='action' value='updateBranch'>";
-                echo sprintf("<input class='btn btn-sm btn-primary' type='submit' value='Update' />");
-                echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branch['branchId']);
-                echo "</form></td>";
-                echo "<td>";
+
+                if ($role == 'admin') {
+                    echo "<td><form class='mb-0' action=admin.php method='post'>";
+                    echo "<input type='hidden' name='action' value='updateBranch'>";
+                    echo sprintf("<input class='btn btn-sm btn-primary' type='submit' value='Update' />");
+                    echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
+                    echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branch['branchId']);
+                    echo "</form></td>";
+                    echo "<td>";
+                } else {
+                    echo "<td><form class='mb-0' action=admin.php method='post'>";
+                    echo "<input type='hidden' name='action'>";
+                    echo sprintf("<input class='btn btn-sm btn-disabled' value='Update' />");
+                    echo "</form></td>";
+                    echo "<td>";
+                }
+
                 echo sprintf("<input class='btn btn-sm btn-disabled' value='' />");
                 echo "</td>";
                 echo "</tr>";
@@ -401,12 +476,14 @@
                 echo "<input type='hidden' name='action' value='confirmUpdateBranch'>";
                 echo sprintf("<input class='btn btn-sm btn-success' type='submit' value='Confirm' />");
                 echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+                echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
                 echo sprintf("<input type='hidden' name='originalBranchImage' value='%s'>", $branch['branchImage']);
                 echo "</form></td>";
                 echo "</form>";
 
                 echo "<td><form class='mb-0' action=admin.php method='post'>";
                 echo "<input type='hidden' name='action' value='cancelUpdateBranch'>";
+                echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
                 echo sprintf("<input class='btn btn-sm btn-error' type='submit' value='Cancel' />");
                 echo "</form></td>";
                 echo "</tr>";

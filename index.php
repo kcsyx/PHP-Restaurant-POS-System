@@ -18,7 +18,8 @@
     if (isset($_POST['login']) && !empty($_POST['username']) && !empty($_POST['userpassword'])) {
         $user = getUser($_POST['username'], $_POST['userpassword']);
         if (is_array($user)) {
-            header("location: admin.php");
+            $userRole = $user['userRole']; 
+            header("location: admin.php?role=".$userRole);
         } else {
             $error = "Your Username or Password is invalid!";
         }
