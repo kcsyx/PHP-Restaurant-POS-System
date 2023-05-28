@@ -149,7 +149,46 @@
                 $billItemIds = $_POST['billItemIds'];
                 displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway);
                 break;
+            case "checkMember":
+                $branchId = $_POST['branchId'];
+                $isTakeaway = $_POST['isTakeaway'];
+                $tableId = $_POST['tableId'];
+                $sum = $_POST['sum'];
+                $billItemIds = $_POST['billItemIds'];
+                $member = getMember($_POST['memberNumber']);
+                if (!empty($member)) {
+                    displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway, $_POST['memberNumber']);
+                } else {
+                    displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway);
+                }
+                break;
+            case "redeemPoints":
+                $branchId = $_POST['branchId'];
+                $isTakeaway = $_POST['isTakeaway'];
+                $tableId = $_POST['tableId'];
+                $memberNumber = $_POST['memberNumber'];
+                $sum = $_POST['sum'];
+                $sum -= 2;
+                $billItemIds = $_POST['billItemIds'];
+                displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway, $memberNumber, true);
+                break;
+            case "cancelRedemption":
+                $branchId = $_POST['branchId'];
+                $isTakeaway = $_POST['isTakeaway'];
+                $tableId = $_POST['tableId'];
+                $memberNumber = $_POST['memberNumber'];
+                $sum = $_POST['sum'];
+                $sum += 2;
+                $billItemIds = $_POST['billItemIds'];
+                displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway, $memberNumber, false);
+                break;
             case "submitPayment":
+                if (!empty($_POST['memberNumber'])) {
+                    $memberNumber = $_POST['memberNumber'];
+                    $pointsGotten = $_POST['pointsGotten'];
+                    $pointsDeducted = $_POST['pointsDeducted'];
+                    updateMember($memberNumber, $pointsGotten, $pointsDeducted);
+                }
                 $tableId = $_POST['tableId'];
                 $isTakeaway = $_POST['isTakeaway'];
                 $branchId = $_POST['branchId'];

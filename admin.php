@@ -31,6 +31,11 @@
     echo "</form></div>";
 
     echo "<div class='navbar-end gap-2'>";
+    // View Members Button
+    echo "<div><form class='mb-8' action=admin.php method='post'>";
+    echo "<input type='hidden' name='action' value='viewMembers'><input class='btn btn-primary w-full max-w-xs' type='submit' value='Members' />";
+    echo sprintf("<input type='hidden' name='role' value='%s'>", $userRole);
+    echo "</form></div>";
     // View Payments Button
     echo "<div><form class='mb-8' action=admin.php method='post'>";
     echo "<input type='hidden' name='action' value=''><input class='btn btn-primary w-full max-w-xs' type='submit' value='Payments' />";
@@ -99,6 +104,43 @@
             case 'cancelNewPromotion':
                 global $userRole;
                 adminPromotions(0, false, $userRole);
+                break;
+            case 'viewMembers':
+                global $userRole;
+                adminMembers(0, false, $userRole);
+                break;
+            case 'updateMember':
+                global $userRole;
+                $memberId = $_POST['memberId'];
+                adminMembers($memberId, false, $userRole);
+                break;
+            case 'cancelUpdateMember':
+                global $userRole;
+                adminMembers(0, false, $userRole);
+                break;
+            case 'confirmUpdateMember':
+                global $userRole;
+                updateMemberDetails($_POST['memberFirstName'], $_POST['memberLastName'], $_POST['memberNumber'], $_POST['memberId']);
+                adminMembers(0, false, $userRole);
+                break;
+            case 'deleteMember':
+                $memberId = $_POST['memberId'];
+                global $userRole;
+                removeMember($memberId);
+                adminPromotions(0, false, $userRole);
+                break;
+            case 'newMember':
+                global $userRole;
+                adminMembers(0, true, $userRole);
+                break;
+            case 'confirmNewMember':
+                createMember($_POST['memberFirstName'], $_POST['memberLastName'], $_POST['memberNumber']);
+                global $userRole;
+                adminMembers(0, false, $userRole);
+                break;
+            case 'cancelNewMember':
+                global $userRole;
+                adminMembers(0, false, $userRole);
                 break;
             case 'viewBranches':
                 $branchId = $_POST['branchId'];
@@ -330,6 +372,141 @@
 
         if (empty($promotions)) {
             echo "<p><i>No promotions found.</i></p>";
+        }
+    }
+
+    function adminMembers($memberId, $isNew, $role)
+    {
+
+        $members = getAllMembers();
+
+        echo "<div class='pt-8'>";
+
+        echo "<div class='overflow-x-auto'>";
+        echo "<table class='table table-zebra w-full'>";
+        echo "<thead>";
+        echo "<tr>";
+        echo "<th>Member Id</th>";
+        echo "<th>First Name</th>";
+        echo "<th>Last Name</th>";
+        echo "<th>Phone Number</th>";
+        echo "<th>Total Points</th>";
+        echo "<th>Actions</th>";
+        echo "<th></th>";
+        echo "<th>";
+        if ($role == 'admin') {
+            echo "<form class='mb-0' action=admin.php method='post'>";
+            echo "<input type='hidden' name='action' value='newMember'>";
+            echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
+            echo sprintf("<input class='btn btn-sm btn-success' type='submit' value='New Member' />");
+            echo "</form>";
+        }
+        echo "</th>";
+        echo "</tr>";
+        echo "</thead>";
+        echo "<tbody>";
+        foreach ($members as $member):
+            if ($memberId != $member['memberId']) {
+                echo "<tr>";
+                echo sprintf("<td>%s</td>", $member['memberId']);
+                echo sprintf("<td>%s</td>", $member['memberFirstName']);
+                echo sprintf("<td>%s</td>", $member['memberLastName']);
+                echo sprintf("<td>%s</td>", $member['memberNumber']);
+                echo sprintf("<td>%s</td>", $member['totalPoints']);
+
+                if ($role == 'admin') {
+                    echo "<td><form class='mb-0' action=admin.php method='post'>";
+                    echo "<input type='hidden' name='action' value='updateMember'>";
+                    echo sprintf("<input class='btn btn-sm btn-primary' type='submit' value='Update' />");
+                    echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
+                    echo sprintf("<input type='hidden' name='memberId' value='%s'>", $member['memberId']);
+                    echo "</form></td>";
+                    echo "<td><form class='mb-0' action=admin.php method='post'>";
+                    echo "<input type='hidden' name='action' value='deleteMember'>";
+                    echo sprintf("<input class='btn btn-sm btn-error' type='submit' value='Delete' />");
+                    echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
+                    echo sprintf("<input type='hidden' name='memberId' value='%s'>", $member['memberId']);
+                    echo "</form></td>";
+                    echo "<td>";
+                    echo sprintf("<input class='btn btn-sm btn-disabled' value='' />");
+                    echo "</td>";
+                } else {
+                    echo "<td><form class='mb-0' action=admin.php method='post'>";
+                    echo "<input type='hidden' name='action'>";
+                    echo sprintf("<input class='btn btn-sm btn-disabled' value='Update' />");
+                    echo "</form></td>";
+                    echo "<td><form class='mb-0' action=admin.php method='post'>";
+                    echo "<input type='hidden' name='action'>";
+                    echo sprintf("<input class='btn btn-sm btn-disabled' value='Delete' />");
+                    echo "</form></td>";
+                    echo "<td>";
+                    echo "</td>";
+                }
+
+                echo "</tr>";
+            } else {
+                echo "<tr>";
+                echo sprintf("<td>%s</td>", $member['memberId']);
+                echo "<form class='mt-8' method='post''>";
+                echo sprintf("<td><input type='text' placeholder='%s' class='input input-bordered w-full max-w-xs' name='memberFirstName' value='%s'/></td>", $member['memberFirstName'], $member['memberFirstName']);
+                echo sprintf("<td><input type='text' placeholder='%s' class='input input-bordered w-full max-w-xs' name='memberLastName' value='%s'/></td>", $member['memberLastName'], $member['memberLastName']);
+                echo sprintf("<td><input type='text' placeholder='%s' class='input input-bordered w-full max-w-xs' name='memberNumber' value='%s'/></td>", $member['memberNumber'], $member['memberNumber']);
+                echo sprintf("<td>%s</td>", $member['totalPoints']);
+
+                echo "<td><form class='mb-0' action=admin.php method='post'>";
+                echo "<input type='hidden' name='action' value='confirmUpdateMember'>";
+                echo sprintf("<input class='btn btn-sm btn-success' type='submit' value='Confirm' />");
+                echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
+                echo sprintf("<input type='hidden' name='memberId' value='%s'>", $memberId);
+                echo "</form></td>";
+                echo "</form>";
+
+                echo "<td><form class='mb-0' action=admin.php method='post'>";
+                echo "<input type='hidden' name='action' value='cancelUpdateMember'>";
+                echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
+                echo sprintf("<input class='btn btn-sm btn-error' type='submit' value='Cancel' />");
+                echo "</form></td>";
+
+                echo "<td>";
+                echo sprintf("<input class='btn btn-sm btn-disabled' value='' />");
+                echo "</td>";
+                echo "</tr>";
+            }
+
+        endforeach;
+
+        if ($isNew == true) {
+            echo "<tr>";
+            echo sprintf("<td></td>");
+            echo "<form class='mt-8' method='post''>";
+            echo sprintf("<td><input type='text' placeholder='First Name' class='input input-bordered w-full max-w-xs' name='memberFirstName'/></td>");
+            echo sprintf("<td><input type='text' placeholder='Last Name' class='input input-bordered w-full max-w-xs' name='memberLastName'/></td>");
+            echo sprintf("<td><input type='text' placeholder='Phone Number' class='input input-bordered w-full max-w-xs' name='memberNumber'/></td>");
+
+            echo "<td><form class='mb-0' action=admin.php method='post'>";
+            echo "<input type='hidden' name='action' value='confirmNewMember'>";
+            echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
+            echo sprintf("<input class='btn btn-sm btn-success' type='submit' value='Confirm' />");
+            echo "</form></td>";
+            echo "</form>";
+
+            echo "<td><form class='mb-0' action=admin.php method='post'>";
+            echo "<input type='hidden' name='action' value='cancelNewMember'>";
+            echo sprintf("<input type='hidden' name='role' value='%s'>", $role);
+            echo sprintf("<input class='btn btn-sm btn-error' type='submit' value='Cancel' />");
+            echo "</form></td>";
+
+            echo "<td>";
+            echo sprintf("<input class='btn btn-sm btn-disabled' value='' />");
+            echo "</td>";
+            echo "</tr>";
+        }
+        echo "</tbody>";
+        echo "</table>";
+        echo "</div>";
+
+        if (empty($members)) {
+            echo "<p><i>No members found.</i></p>";
         }
     }
 

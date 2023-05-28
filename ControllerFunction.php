@@ -94,6 +94,21 @@ function getAllPromotions()
     return $promotions;
 }
 
+function getAllMembers()
+{
+    global $DB;
+    $members = $DB->select_query("SELECT * FROM member");
+    return $members;
+}
+
+function getMember($memberNumber)
+{
+    global $DB;
+    $selectSQL = sprintf("SELECT * FROM member WHERE memberNumber = %s", $memberNumber);
+    $member = $DB->select_query($selectSQL, 1);
+    return $member;
+}
+
 function getAllTables($branchId)
 {
     global $DB;
@@ -231,6 +246,13 @@ function createPromotion($promotionName, $promotionCode, $promotionValue)
     $DB->update_query($insertSQL);
 }
 
+function createMember($memberFirstName, $memberLastName, $memberNumber)
+{
+    global $DB;
+    $insertSQL = sprintf("INSERT INTO `member`(`memberId`, `memberFirstName`, `memberLastName`, `memberNumber`, `totalPoints` ) VALUES (NULL,'%s','%s','%s', 0)", $memberFirstName, $memberLastName, $memberNumber);
+    $DB->update_query($insertSQL);
+}
+
 /******************************************************************
    All the DELETE SQL connections to the Database
    In reality, no one uses DELETE. This is strictly for demo purposes.
@@ -272,6 +294,13 @@ function removePromotion($promotionId)
     $DB->update_query($deleteSQL);
 }
 
+function removeMember($memberId)
+{
+    global $DB;
+    $deleteSQL = sprintf("DELETE FROM member WHERE memberId = %s", $memberId);
+    $DB->update_query($deleteSQL);
+}
+
 /******************************************************************
    All the UPDATE SQL connections to the Database
    ******************************************************************/
@@ -303,4 +332,19 @@ function freeTable($tableId)
     $updateSQL = sprintf("UPDATE `Table` SET isReserved=%s WHERE tableId = %s", 0, $tableId);
     $DB->update_query($updateSQL);
 }
+
+function updateMember($memberNumber, $pointsGotten, $pointsDeducted)
+{
+    global $DB;
+    $updateSQL = sprintf("UPDATE member SET totalPoints= totalPoints + %s - %s WHERE memberNumber = %s", $pointsGotten, $pointsDeducted, $memberNumber);
+    $DB->update_query($updateSQL);
+}
+
+function updateMemberDetails($firstName, $lastName, $phoneNumber, $memberId)
+{
+    global $DB;
+    $updateSQL = sprintf("UPDATE member SET memberFirstName='%s', memberLastName ='%s', memberNumber='%s' WHERE memberId = %s", $firstName, $lastName, $phoneNumber, $memberId);
+    $DB->update_query($updateSQL);
+}
+
 ?>

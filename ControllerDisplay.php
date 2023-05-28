@@ -230,8 +230,11 @@ function displayCart($branchId, $promotionValue, $tableId, $isTakeaway)
     echo "</div>";
 }
 
-function displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway)
+function displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway, $memberNumber = null, $usePoints = false)
 {
+    $pointsGotten = 0;
+    $pointsDeducted = 0;
+    $member = getMember($memberNumber);
     echo "<div class='container my-16 px-6 mx-auto'>";
 
     echo "<div class='pb-16 navbar text-neutral-content'>";
@@ -245,6 +248,48 @@ function displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway)
 
     echo "<div class='pt-16 grid justify-center items-center'>";
     echo sprintf("<div class='text-center stat-value'><b>$%s</b></div>", number_format((float) $sum, 2, '.', ''));
+
+    if (!empty($member['memberNumber'])) {
+        echo sprintf("<p class='text-center pt-10'>You have %s points.<p><br>", $member['totalPoints']);
+
+        if ($member['totalPoints'] >= 10 && $usePoints == false) {
+            echo "<p class='text-center'>Redeem 10 points for $2 off.<p><br>";
+            echo "<form class='mb-0' action=view.php method='post'>";
+            echo "<input type='hidden' name='action' value='redeemPoints'><input class='w-full btn btn-primary' type='submit' value='Redeem' />";
+            echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+            echo sprintf("<input type='hidden' name='memberNumber' value='%s'>", $memberNumber);
+            echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+            echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
+            echo sprintf("<input type='hidden' name='billItemIds' value='%s'>", $billItemIds);
+            echo sprintf("<input type='hidden' name='sum' value='%s'>", $sum);
+            echo "</form>";
+        } else if ($usePoints == true) {
+            echo "<form class='mb-0' action=view.php method='post'>";
+            echo "<input type='hidden' name='action' value='cancelRedemption'><input class='w-full btn btn-primary' type='submit' value='Cancel Redemption' /><br><br>";
+            echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+            echo sprintf("<input type='hidden' name='memberNumber' value='%s'>", $memberNumber);
+            echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+            echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
+            echo sprintf("<input type='hidden' name='billItemIds' value='%s'>", $billItemIds);
+            echo sprintf("<input type='hidden' name='sum' value='%s'>", $sum);
+            $pointsDeducted = 10;
+            echo "</form>";
+        }
+
+        $pointsGotten = floor($sum / 5);
+        echo sprintf("<p class='text-center pt-10'>You will gain %s points from this transaction.</p>", $pointsGotten);
+    } else {
+        echo "<form class='pt-10 mb-0' action=view.php method='post'>";
+        echo "<input type='text' placeholder='Member Number' class='input input-bordered w-1/2 max-w-xs' name='memberNumber'/>";
+        echo "<input type='hidden' name='action' value='checkMember'><input class='btn btn-primary w-1/2 max-w-xs' type='submit' value='Confirm' />";
+        echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+        echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+        echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
+        echo sprintf("<input type='hidden' name='billItemIds' value='%s'>", $billItemIds);
+        echo sprintf("<input type='hidden' name='sum' value='%s'>", $sum);
+        echo "</form>";
+    }
+
     echo "<div class='pt-10 form-control w-full max-w-xs'><form action=view.php method='post'>";
     echo "
     <select class='text-center w-full select select-bordered' id='payment' name='payment'>
@@ -252,6 +297,11 @@ function displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway)
       <option value='AMEX'>AMEX</option>
     </select><br><br>";
     echo "<input type='hidden' name='action' value='submitPayment'><input class='w-full btn btn-success' type='submit' value='Pay' />";
+    if (!empty($member['memberNumber'])) {
+        echo sprintf("<input type='hidden' name='memberNumber' value='%s'>", $member['memberNumber']);
+        echo sprintf("<input type='hidden' name='pointsGotten' value='%s'>", $pointsGotten);
+        echo sprintf("<input type='hidden' name='pointsDeducted' value='%s'>", $pointsDeducted);
+    }
     echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
     echo sprintf("<input type='hidden' name='sum' value='%s'>", $sum);
     echo sprintf("<input type='hidden' name='billItemIds' value='%s'>", $billItemIds);
