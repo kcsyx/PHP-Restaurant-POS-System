@@ -8,7 +8,7 @@ $DB = new DB();
 $DB->host = "localhost";
 $DB->user = "root";
 $DB->password = "root";
-$DB->db = "uxg2520_softwaredesign_systemdesigners";
+$DB->db = "uxg2520softwaredesign_systemdesigners";
 // modify this and add _[yourTeamName]. When you create the database, make sure they are the same database name
 // Example: uxg2520su23software_AlwynTeamName
 
