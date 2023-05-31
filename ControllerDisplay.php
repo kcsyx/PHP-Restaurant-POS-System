@@ -371,15 +371,22 @@ function displayMenu($branchId, $tableId, $isTakeaway)
     echo sprintf("<p class='text-lg'>Branch: <b>%s</b></p>", $branch['branchName']);
     if ($isTakeaway == false) {
         $table = getTable($tableId);
-        echo sprintf("<p class='text-lg'>Table Number: <b>%s</b></p><br><br>", $table['tableNo']);
+        echo sprintf("<p class='text-lg'>Table Number: <b>%s</b></p><br>", $table['tableNo']);
     } else {
         echo "<br>";
     }
+
     $menuId = (getMenu($branchId))['menuId'];
     $menuCategories = getMenuCategories($menuId);
 
+    echo "<div class='text-center'>";
+    foreach($menuCategories as $menuCategory):
+        echo sprintf("<a class='btn btn-sm ml-5' href='#%s'>%s</a>", $menuCategory['menuCategoryName'], $menuCategory['menuCategoryName']);
+    endforeach;
+    echo "</div>";
+
     foreach ($menuCategories as $menuCategory):
-        echo "<div>";
+        echo sprintf("<div id='%s'>", $menuCategory['menuCategoryName']);
         echo sprintf("<b>%s</b>", $menuCategory['menuCategoryName']);
         echo "</div>";
         echo "<div class='divider'></div>";
