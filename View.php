@@ -16,6 +16,7 @@
     include("Common.php");
 
     $branches = getAllBranches();
+
     if (!empty($_POST)):
         // debug message to check the post actions
         //printArray($_POST);
@@ -39,21 +40,22 @@
                     displayTables($branchId, $isTakeaway);
                 } else {
                     $tableId = "null";
-                    displayMenu($branchId, $tableId, $isTakeaway);
+                    displayMenu($branchId, $tableId, $isTakeaway, 0);
                 }
                 break;
             case "selectTable":
                 $branchId = $_POST['branchId'];
                 $isTakeaway = $_POST['isTakeaway'];
                 $tableId = $_POST['tableId'];
-                displayMenu($branchId, $tableId, $isTakeaway);
+                displayMenu($branchId, $tableId, $isTakeaway, 0);
                 break;
             case "viewItemAddOns":
                 $menuItemId = $_POST['menuItemId'];
                 $tableId = $_POST['tableId'];
                 $branchId = $_POST['branchId'];
                 $isTakeaway = $_POST['isTakeaway'];
-                displayItemAddOns($menuItemId, $tableId, $branchId, $isTakeaway);
+                $newCust = $_POST['newCust'];
+                displayItemAddOns($menuItemId, $tableId, $branchId, $isTakeaway, $newCust);
                 break;
             case "selectAddOns":
                 if (!empty($_POST['itemTypes'])) {
@@ -65,54 +67,60 @@
                 $tableId = $_POST['tableId'];
                 $branchId = $_POST['branchId'];
                 $isTakeaway = $_POST['isTakeaway'];
+                $newCust = $_POST['newCust'];
                 addToCart($menuItemId, $tableId, $itemAddOns);
-                displayMenu($branchId, $tableId, $isTakeaway);
+                displayMenu($branchId, $tableId, $isTakeaway, $newCust);
                 displayPopUp();
                 break;
             case "addToCart":
                 $menuItemId = $_POST['menuItemId'];
                 $tableId = $_POST['tableId'];
                 $branchId = $_POST['branchId'];
+                $newCust = $_POST['newCust'];
                 $isTakeaway = $_POST['isTakeaway'];
                 addToCart($menuItemId, $tableId, null);
-                displayMenu($branchId, $tableId, $isTakeaway);
+                displayMenu($branchId, $tableId, $isTakeaway, $newCust);
                 displayPopup();
                 break;
             case "viewCart":
                 $tableId = $_POST['tableId'];
                 $isTakeaway = $_POST['isTakeaway'];
                 $branchId = $_POST['branchId'];
-                displayCart($branchId, 0, $tableId, $isTakeaway);
+                $newCust = $_POST['newCust'];
+                displayCart($branchId, 0, $tableId, $isTakeaway, $newCust);
                 break;
             case "applyPromotionCode":
                 $tableId = $_POST['tableId'];
                 $promotionCode = $_POST['promotionCode'];
                 $isTakeaway = $_POST['isTakeaway'];
+                $newCust = $_POST['newCust'];
                 $branchId = $_POST['branchId'];
                 $promotion = checkPromoCode($promotionCode);
                 if (!empty($promotion['promotionValue'])) {
                     $discount = $promotion['promotionValue'];
-                    displayCart($branchId, $discount, $tableId, $isTakeaway);
+                    displayCart($branchId, $discount, $tableId, $isTakeaway, $newCust);
                     displayDiscountPopup();
                 } else {
                     $discount = 0;
-                    displayCart($branchId, $discount, $tableId, $isTakeaway);
+                    displayCart($branchId, $discount, $tableId, $isTakeaway, $newCust);
                 }
                 break;
             case "removeItemFromCart":
                 $cartId = $_POST['cartId'];
                 $tableId = $_POST['tableId'];
                 $isTakeaway = $_POST['isTakeaway'];
+                $newCust = $_POST['newCust'];
                 $branchId = $_POST['branchId'];
                 removeCartItem($cartId);
-                displayCart($branchId, 0, $tableId, $isTakeaway);
+                displayCart($branchId, 0, $tableId, $isTakeaway, $newCust);
                 break;
             case "removeAllItemsFromCart":
                 $tableId = $_POST['tableId'];
                 $isTakeaway = $_POST['isTakeaway'];
+                $newCust = $_POST['newCust'];
                 $branchId = $_POST['branchId'];
                 removeAllCartItems();
-                displayCart($branchId, 0, $tableId, $isTakeaway);
+                displayCart($branchId, 0, $tableId, $isTakeaway, $newCust);
                 break;
             case "goBack":
                 removeAllCartItems();
@@ -133,54 +141,60 @@
                 $branchId = $_POST['branchId'];
                 $isTakeaway = $_POST['isTakeaway'];
                 $tableId = $_POST['tableId'];
-                displayMenu($branchId, $tableId, $isTakeaway);
+                $newCust = $_POST['newCust'];
+                displayMenu($branchId, $tableId, $isTakeaway, $newCust);
                 break;
             case "goBackFromPay":
                 $isTakeaway = $_POST['isTakeaway'];
                 $branchId = $_POST['branchId'];
+                $newCust = $_POST['newCust'];
                 $tableId = $_POST['tableId'];
-                displayCart($branchId, 0, $tableId, $isTakeaway);
+                displayCart($branchId, 0, $tableId, $isTakeaway, $newCust);
                 break;
             case "payCart":
                 $branchId = $_POST['branchId'];
                 $isTakeaway = $_POST['isTakeaway'];
                 $tableId = $_POST['tableId'];
+                $newCust = $_POST['newCust'];
                 $sum = $_POST['sum'];
                 $billItemIds = $_POST['billItemIds'];
-                displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway);
+                displayPay($newCust, $branchId, $sum, $billItemIds, $tableId, $isTakeaway);
                 break;
             case "checkMember":
                 $branchId = $_POST['branchId'];
                 $isTakeaway = $_POST['isTakeaway'];
                 $tableId = $_POST['tableId'];
+                $newCust = $_POST['newCust'];
                 $sum = $_POST['sum'];
                 $billItemIds = $_POST['billItemIds'];
                 $member = getMember($_POST['memberNumber']);
                 if (!empty($member)) {
-                    displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway, $_POST['memberNumber']);
+                    displayPay($newCust, $branchId, $sum, $billItemIds, $tableId, $isTakeaway, $_POST['memberNumber']);
                 } else {
-                    displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway);
+                    displayPay($newCust, $branchId, $sum, $billItemIds, $tableId, $isTakeaway);
                 }
                 break;
             case "redeemPoints":
                 $branchId = $_POST['branchId'];
                 $isTakeaway = $_POST['isTakeaway'];
                 $tableId = $_POST['tableId'];
+                $newCust = $_POST['newCust'];
                 $memberNumber = $_POST['memberNumber'];
                 $sum = $_POST['sum'];
                 $sum -= 2;
                 $billItemIds = $_POST['billItemIds'];
-                displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway, $memberNumber, true);
+                displayPay($newCust, $branchId, $sum, $billItemIds, $tableId, $isTakeaway, $memberNumber, true);
                 break;
             case "cancelRedemption":
                 $branchId = $_POST['branchId'];
                 $isTakeaway = $_POST['isTakeaway'];
+                $newCust = $_POST['newCust'];
                 $tableId = $_POST['tableId'];
                 $memberNumber = $_POST['memberNumber'];
                 $sum = $_POST['sum'];
                 $sum += 2;
                 $billItemIds = $_POST['billItemIds'];
-                displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway, $memberNumber, false);
+                displayPay($newCust, $branchId, $sum, $billItemIds, $tableId, $isTakeaway, $memberNumber, false);
                 break;
             case "submitPayment":
                 if (!empty($_POST['memberNumber'])) {
@@ -191,18 +205,24 @@
                 }
                 $tableId = $_POST['tableId'];
                 $isTakeaway = $_POST['isTakeaway'];
+                $newCust = $_POST['newCust'];
                 $branchId = $_POST['branchId'];
                 $sum = $_POST['sum'];
                 $billItemIds = $_POST['billItemIds'];
                 $paymentMethod = $_POST['payment'];
-                createBill($sum, $billItemIds, $paymentMethod, $tableId, $branchId);
+                if ($newCust == 0) {
+                    createBill($sum, $billItemIds, $paymentMethod, $tableId, $branchId);
+                    $newCust = 1;
+                } else if ($newCust == 1) {
+                    createBillSameOrder($sum, $billItemIds, $paymentMethod, $tableId, $branchId);
+                }
                 $billId = getLatestBill()['billId'];
                 createPayment($paymentMethod, $sum, $billId);
                 removeAllCartItems();
                 if ($isTakeaway == false) {
                     updateTable($tableId);
                 }
-                displayPaymentReceipt($branchId, $tableId, $isTakeaway);
+                displayPaymentReceipt($branchId, $tableId, $isTakeaway, $newCust);
                 break;
             default:
                 removeAllCartItems();
@@ -214,6 +234,7 @@
         removeAllCartItems();
         displayBranches($branches);
     endif;
+
     ?>
 
 </body>

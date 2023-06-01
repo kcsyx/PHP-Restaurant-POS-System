@@ -224,11 +224,30 @@ function addToCart($menuItemId, $tableId, $itemAddOns)
     $DB->update_query($insertSQL);
 }
 
-
 function createBill($sum, $billItemIds, $paymentMethod, $tableId, $branchId)
 {
     global $DB;
-    $insertSQL = sprintf("INSERT INTO Bill VALUES (NULL, '%s', $sum, $tableId, $branchId)", $billItemIds);
+
+    if(!empty(getLatestBill())){
+        $id = getLatestBill()['customerId'];
+        $id = $id + 1;
+    } else {
+        $id = 1;
+    }
+
+    $insertSQL = sprintf("INSERT INTO Bill VALUES (NULL, '%s', $sum, $tableId, $branchId, $id)", $billItemIds);
+    $DB->update_query($insertSQL);
+}
+
+function createBillSameOrder($sum, $billItemIds, $paymentMethod, $tableId, $branchId)
+{
+    global $DB;
+
+    if(!empty(getLatestBill())){
+        $id = getLatestBill()['customerId'];
+    }
+
+    $insertSQL = sprintf("INSERT INTO Bill VALUES (NULL, '%s', $sum, $tableId, $branchId, $id)", $billItemIds);
     $DB->update_query($insertSQL);
 }
 

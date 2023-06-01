@@ -3,7 +3,7 @@
    ControllerDisplay.php
    This file communicates with View.php and responsible for all the display output
    ******************************************************************/
-function displayPaymentReceipt($branchId, $tableId, $isTakeaway)
+function displayPaymentReceipt($branchId, $tableId, $isTakeaway, $newCust)
 {
     $payment = getLatestPayment();
     $cartItems = getLatestBill()['menuIds'];
@@ -19,6 +19,7 @@ function displayPaymentReceipt($branchId, $tableId, $isTakeaway)
     echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
     echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
     echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+    echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
     echo "</form></div></div>";
 
     echo "<div class='w-1/2 float-left'><b>Payment Receipt</b><div class='divider'></div>";
@@ -46,7 +47,7 @@ function displayPaymentReceipt($branchId, $tableId, $isTakeaway)
     echo "</div>";
 }
 
-function displayItemAddOns($menuItemId, $tableId, $branchId, $isTakeaway)
+function displayItemAddOns($menuItemId, $tableId, $branchId, $isTakeaway, $newCust)
 {
     echo "<div class='container my-16 px-6 mx-auto'>";
 
@@ -57,6 +58,7 @@ function displayItemAddOns($menuItemId, $tableId, $branchId, $isTakeaway)
     echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
     echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
     echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+    echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
     echo "</form></div></div>";
 
     $menuItem = getMenuItemFromCart($menuItemId);
@@ -86,12 +88,13 @@ function displayItemAddOns($menuItemId, $tableId, $branchId, $isTakeaway)
     echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
     echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
     echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+    echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
     echo "</form>";
 
     echo "</div>";
 }
 
-function displayCart($branchId, $promotionValue, $tableId, $isTakeaway)
+function displayCart($branchId, $promotionValue, $tableId, $isTakeaway, $newCust)
 {
     echo "<div class='container my-16 px-6 mx-auto'>";
 
@@ -101,6 +104,7 @@ function displayCart($branchId, $promotionValue, $tableId, $isTakeaway)
     echo "<input type='hidden' name='action' value='goBackFromCart'><input class='btn btn-primary' type='submit' value='Back to Menu' />";
     echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
     echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+    echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
     echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
     echo "</form></div></div>";
 
@@ -136,6 +140,7 @@ function displayCart($branchId, $promotionValue, $tableId, $isTakeaway)
             echo "<input type='hidden' name='action' value='removeItemFromCart'>";
             echo sprintf("<input class='btn btn-sm btn-error' type='submit' value='Remove' />");
             echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
+            echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
             echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
             echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
             echo sprintf("<input type='hidden' name='cartId' value='%s'>", $item['cartId']);
@@ -178,6 +183,7 @@ function displayCart($branchId, $promotionValue, $tableId, $isTakeaway)
         echo "<input type='hidden' name='action' value='applyPromotionCode'><input class='btn btn-primary w-1/2 max-w-xs' type='submit' value='Apply' />";
         echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
         echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+        echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
         echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
         echo "</form>";
 
@@ -211,6 +217,7 @@ function displayCart($branchId, $promotionValue, $tableId, $isTakeaway)
         echo "<input type='hidden' name='action' value='removeAllItemsFromCart'><input class='btn btn-error' type='submit' value='Remove all items' />";
         echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
         echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+        echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
         echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
         echo "</form></div>";
 
@@ -221,6 +228,7 @@ function displayCart($branchId, $promotionValue, $tableId, $isTakeaway)
         echo sprintf("<input type='hidden' name='sum' value='%s'>", $totalSum);
         echo sprintf("<input type='hidden' name='billItemIds' value='%s'>", $billItemIds);
         echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+        echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
         echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
         echo "</form></div>";
 
@@ -230,7 +238,7 @@ function displayCart($branchId, $promotionValue, $tableId, $isTakeaway)
     echo "</div>";
 }
 
-function displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway, $memberNumber = null, $usePoints = false)
+function displayPay($newCust, $branchId, $sum, $billItemIds, $tableId, $isTakeaway, $memberNumber = null, $usePoints = false)
 {
     $pointsGotten = 0;
     $pointsDeducted = 0;
@@ -243,6 +251,7 @@ function displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway, $membe
     echo "<input type='hidden' name='action' value='goBackFromPay'><input class='btn btn-primary' type='submit' value='Back to Cart' />";
     echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
     echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+    echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
     echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
     echo "</form></div></div>";
 
@@ -259,6 +268,7 @@ function displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway, $membe
             echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
             echo sprintf("<input type='hidden' name='memberNumber' value='%s'>", $memberNumber);
             echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+            echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
             echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
             echo sprintf("<input type='hidden' name='billItemIds' value='%s'>", $billItemIds);
             echo sprintf("<input type='hidden' name='sum' value='%s'>", $sum);
@@ -269,6 +279,7 @@ function displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway, $membe
             echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
             echo sprintf("<input type='hidden' name='memberNumber' value='%s'>", $memberNumber);
             echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+            echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
             echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
             echo sprintf("<input type='hidden' name='billItemIds' value='%s'>", $billItemIds);
             echo sprintf("<input type='hidden' name='sum' value='%s'>", $sum);
@@ -284,6 +295,7 @@ function displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway, $membe
         echo "<input type='hidden' name='action' value='checkMember'><input class='btn btn-primary w-1/2 max-w-xs' type='submit' value='Confirm' />";
         echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
         echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+        echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
         echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
         echo sprintf("<input type='hidden' name='billItemIds' value='%s'>", $billItemIds);
         echo sprintf("<input type='hidden' name='sum' value='%s'>", $sum);
@@ -303,6 +315,7 @@ function displayPay($branchId, $sum, $billItemIds, $tableId, $isTakeaway, $membe
         echo sprintf("<input type='hidden' name='pointsDeducted' value='%s'>", $pointsDeducted);
     }
     echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
+    echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
     echo sprintf("<input type='hidden' name='sum' value='%s'>", $sum);
     echo sprintf("<input type='hidden' name='billItemIds' value='%s'>", $billItemIds);
     echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
@@ -336,7 +349,7 @@ function displayDiscountPopUp()
     echo "</div>";
 }
 
-function displayMenu($branchId, $tableId, $isTakeaway)
+function displayMenu($branchId, $tableId, $isTakeaway, $newCust)
 {
 
     $cartCount = getAllCart();
@@ -364,6 +377,7 @@ function displayMenu($branchId, $tableId, $isTakeaway)
     echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
     echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
     echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+    echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
     echo "</form></div></div>";
     echo "</div>";
     $branch = getBranchFromTable($branchId);
@@ -380,7 +394,7 @@ function displayMenu($branchId, $tableId, $isTakeaway)
     $menuCategories = getMenuCategories($menuId);
 
     echo "<div class='text-center'>";
-    foreach($menuCategories as $menuCategory):
+    foreach ($menuCategories as $menuCategory):
         echo sprintf("<a class='btn btn-sm ml-5' href='#%s'>%s</a>", $menuCategory['menuCategoryName'], $menuCategory['menuCategoryName']);
     endforeach;
     echo "</div>";
@@ -409,6 +423,7 @@ function displayMenu($branchId, $tableId, $isTakeaway)
                 echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
                 echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
                 echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
+                echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
                 echo "</form></div>";
                 echo "</div>";
             } else {
@@ -419,6 +434,7 @@ function displayMenu($branchId, $tableId, $isTakeaway)
                 echo sprintf("<input type='hidden' name='menuItemId' value='%s'>", $menuItem['menuItemId']);
                 echo sprintf("<input type='hidden' name='branchId' value='%s'>", $branchId);
                 echo sprintf("<input type='hidden' name='isTakeaway' value='%s'>", $isTakeaway);
+                echo sprintf("<input type='hidden' name='newCust' value='%s'>", $newCust);
                 echo sprintf("<input type='hidden' name='tableId' value='%s'>", $tableId);
                 echo "</form></div>";
                 echo "</div>";
